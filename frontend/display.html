@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Display — QMS</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <div class="display-screen">
+    <header class="screen-header">
+      <h1>Queue <span>Display</span></h1>
+      <div class="clock" id="clock">--:--:--</div>
+    </header>
+
+    <div class="counters" id="counters-area">
+      <!-- Rendered by JS -->
+    </div>
+
+    <footer class="screen-footer">
+      <div class="footer-stat">Total Served: <span id="total-served">0</span></div>
+      <div class="footer-stat">Now Serving: <span id="active-count">0</span></div>
+      <div class="conn-indicator">
+        <div class="dot" id="conn-dot"></div>
+        <span id="conn-label">Connecting…</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let state = {};
+    let prevActive = {};
+
+    // ── Clock ─────────────────────────────────────────────────────────────────
+    function tickClock() {
+      document.getElementById('clock').textContent =
+        new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    // ── Connection ────────────────────────────────────────────────────────────
+    const $dot   = document.getElementById('conn-dot');
+    const $label = document.getElementById('conn-label');
+
+    socket.on('connect', () => {
+      $dot.classList.add('on');
+      $label.textContent = 'Live';
+    });
+
+    socket.on('disconnect', () => {
+      $dot.classList.remove('on');
+      $label.textContent = 'Disconnected';
+    });
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    socket.on('state', newState => {
+      const oldActive = { ...state.activeNumbers };
+      state = newState;
+      render(oldActive);
+    });
+
+    function render(oldActive = {}) {
+      const area = document.getElementById('counters-area');
+      const counters = state.counters || [];
+      const activeNums = state.activeNumbers || {};
+
+      // Rebuild layout
+      area.innerHTML = '';
+      counters.forEach(c => {
+        const num = activeNums[c.id];
+        const hasNum = num !== undefined;
+        const changed = hasNum && oldActive[c.id] !== num;
+
+        const panel = document.createElement('div');
+        panel.className = 'counter-panel' + (hasNum ? ' has-number' : '');
+        panel.id = `panel-${c.id}`;
+
+        panel.innerHTML = `
+          <div class="counter-panel-label">Counter ${c.id}</div>
+          <div class="counter-panel-name">${c.name}</div>
+          <div class="counter-number ${hasNum ? '' : 'idle'}" id="num-${c.id}">
+            ${hasNum ? num : '·'}
+          </div>
+          <div class="counter-status ${hasNum ? 'serving' : ''}">
+            ${hasNum ? 'Now Serving' : (state.started ? 'Waiting…' : 'Idle')}
+          </div>
+        `;
+
+        area.appendChild(panel);
+
+        if (changed) {
+          const numEl = document.getElementById(`num-${c.id}`);
+          numEl.classList.remove('flash');
+          void numEl.offsetWidth;
+          numEl.classList.add('flash');
+        }
+      });
+
+      // Footer
+      document.getElementById('total-served').textContent = state.completedNumbers?.length ?? 0;
+      document.getElementById('active-count').textContent = Object.keys(activeNums).length;
+    }
+  </script>
+  </div>
+</body>
+</html>

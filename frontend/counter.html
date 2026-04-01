@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Counter — QMS</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <div id="conn-status"></div>
+
+  <div class="counter-page">
+    <header>
+    <div>
+      <div class="header-id" id="counter-id-label">—</div>
+      <div class="counter-name" id="counter-name-label">—</div>
+    </div>
+    <div class="queue-status">
+      <span class="dot" id="conn-dot"></span>
+      <span id="queue-info" style="margin-left:0.5rem;font-size:0.65rem;"></span>
+    </div>
+  </header>
+
+  <main>
+    <div class="number-display">
+      <div class="number-label">Now Serving</div>
+      <div class="number-value idle" id="active-number">—</div>
+    </div>
+
+    <div class="actions">
+      <div style="text-align:center">
+        <button class="btn btn-call" id="btn-call" disabled>Call Next</button>
+        <div class="key-hint" style="margin-top:0.5rem">
+          <span class="key">Enter</span><span style="font-size:0.6rem;color:var(--muted)">/</span><span class="key">Space</span>
+        </div>
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-done" id="btn-done" disabled>Mark as Done</button>
+        <div class="key-hint" style="margin-top:0.5rem">
+          <span class="key">D</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="others-section">
+      <div class="others-label">All Counters</div>
+      <div class="others-grid" id="others-grid"></div>
+    </div>
+  </main>
+
+  <footer>
+    <span class="dot on" id="status-dot" style="display:none"></span>
+    <div id="toast"></div>
+    <span id="total-served" style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-left:auto;"></span>
+  </footer>
+
+  <div class="not-started-overlay" id="not-started">
+    <h2>Queue Not Started</h2>
+    <p>Waiting for admin to start the queue…</p>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // ── Init ──────────────────────────────────────────────────────────────────
+    const params = new URLSearchParams(location.search);
+    const MY_ID = parseInt(params.get('c') || '1', 10);
+
+    if (![1,2,3].includes(MY_ID)) {
+      document.body.innerHTML = '<p style="padding:2rem;font-family:monospace;color:#ff4d4d">Invalid counter ID. Use ?c=1, ?c=2, or ?c=3</p>';
+      throw new Error('invalid counter');
+    }
+
+    document.title = `Counter ${MY_ID} — QMS`;
+
+    const socket = io();
+    let state = {};
+    let toastTimer = null;
+
+    // ── Elements ──────────────────────────────────────────────────────────────
+    const $connStatus  = document.getElementById('conn-status');
+    const $connDot     = document.getElementById('conn-dot');
+    const $counterIdLbl= document.getElementById('counter-id-label');
+    const $counterName = document.getElementById('counter-name-label');
+    const $activeNum   = document.getElementById('active-number');
+    const $btnCall     = document.getElementById('btn-call');
+    const $btnDone     = document.getElementById('btn-done');
+    const $othersGrid  = document.getElementById('others-grid');
+    const $toast       = document.getElementById('toast');
+    const $totalServed = document.getElementById('total-served');
+    const $notStarted  = document.getElementById('not-started');
+    const $queueInfo   = document.getElementById('queue-info');
+
+    // ── Connection ────────────────────────────────────────────────────────────
+    socket.on('connect', () => {
+      $connStatus.classList.add('connected');
+      $connDot.classList.add('on');
+    });
+
+    socket.on('disconnect', () => {
+      $connStatus.classList.remove('connected');
+      $connDot.classList.remove('on');
+    });
+
+    socket.on('error', msg => showToast(msg));
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    socket.on('state', newState => {
+      const prevActive = state.activeNumbers?.[MY_ID];
+      state = newState;
+      render(prevActive);
+    });
+
+    function render(prevActive) {
+      const counter = state.counters?.find(c => c.id === MY_ID);
+      const myActive = state.activeNumbers?.[MY_ID];
+      const hasActive = myActive !== undefined;
+      const enabled = counter?.enabled ?? true;
+
+      // Overlay
+      $notStarted.style.display = state.started ? 'none' : '';
+
+      // Header
+      $counterIdLbl.textContent = `Counter ${MY_ID}`;
+      $counterName.textContent = counter?.name || `Counter ${MY_ID}`;
+
+      // Active number
+      const numChanged = myActive !== prevActive;
+      if (hasActive) {
+        $activeNum.textContent = myActive;
+        $activeNum.classList.remove('idle');
+        if (numChanged) {
+          $activeNum.classList.remove('pop');
+          void $activeNum.offsetWidth; // reflow
+          $activeNum.classList.add('pop');
+        }
+      } else {
+        $activeNum.textContent = '—';
+        $activeNum.classList.add('idle');
+      }
+
+      // Buttons
+      const canCall = state.started && enabled && !hasActive;
+      const canDone = hasActive;
+      $btnCall.disabled = !canCall;
+      $btnDone.disabled = !canDone;
+
+      // Queue info
+      $queueInfo.textContent = state.started
+        ? `Next: #${state.nextNumber}`
+        : 'Idle';
+
+      // Others grid
+      $othersGrid.innerHTML = '';
+      (state.counters || []).forEach(c => {
+        const active = state.activeNumbers?.[c.id];
+        const isMe = c.id === MY_ID;
+        const card = document.createElement('div');
+        card.className = [
+          'other-card',
+          active !== undefined ? 'has-active' : '',
+          isMe ? 'is-me' : '',
+        ].join(' ');
+        card.innerHTML = `
+          <div class="other-card-name">${c.name}${isMe ? ' (you)' : ''}${!c.enabled ? ' ·off' : ''}</div>
+          <div class="other-card-num ${active === undefined ? 'empty' : ''}">${active ?? '·'}</div>
+        `;
+        $othersGrid.appendChild(card);
+      });
+
+      // Total served
+      $totalServed.textContent = `Served: ${state.completedNumbers?.length ?? 0}`;
+    }
+
+    // ── Actions ───────────────────────────────────────────────────────────────
+    $btnCall.addEventListener('click', () => {
+      socket.emit('counter:callNext', { counterId: MY_ID });
+    });
+
+    $btnDone.addEventListener('click', () => {
+      socket.emit('counter:markDone', { counterId: MY_ID });
+    });
+
+    // ── Keyboard shortcuts ────────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+      if ((e.key === 'Enter' || e.key === ' ') && !$btnCall.disabled) {
+        e.preventDefault();
+        socket.emit('counter:callNext', { counterId: MY_ID });
+      }
+      if (e.key === 'd' || e.key === 'D') {
+        if (!$btnDone.disabled) socket.emit('counter:markDone', { counterId: MY_ID });
+      }
+    });
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    function showToast(msg) {
+      $toast.textContent = msg;
+      $toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $toast.classList.remove('show'), 3000);
+    }
+  </script>
+  </div>
+</body>
+</html>

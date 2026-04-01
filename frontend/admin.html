@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — QMS</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <div id="conn-status"></div>
+
+  <div class="admin-page">
+    <header>
+      <div class="header-title">QMS <span>Admin</span></div>
+      <span class="dot" id="conn-dot" style="margin-left:auto"></span>
+      <span id="queue-state-badge" class="badge">Idle</span>
+    </header>
+
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+
+      <!-- Stats -->
+      <section>
+        <div class="section-label">Stats</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="val" id="stat-served">0</div>
+            <div class="lbl">Total Served</div>
+          </div>
+          <div class="stat-card">
+            <div class="val" id="stat-active">0</div>
+            <div class="lbl">Active Now</div>
+          </div>
+          <div class="stat-card">
+            <div class="val" id="stat-next">1</div>
+            <div class="lbl">Next Number</div>
+          </div>
+          <div class="stat-card">
+            <div class="val" id="stat-log">0</div>
+            <div class="lbl">Log Entries</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Queue Control -->
+      <section>
+        <div class="section-label">Queue Control</div>
+        <div class="control-btns">
+          <button class="btn btn-start" id="btn-start">Start Queue</button>
+          <button class="btn btn-reset" id="btn-reset">Reset Queue</button>
+        </div>
+      </section>
+
+      <!-- Counters -->
+      <section>
+        <div class="section-label">Counters</div>
+        <div id="counters-list" style="display:flex;flex-direction:column;gap:0.5rem"></div>
+      </section>
+
+      </aside>
+
+      <!-- Main log -->
+      <div class="admin-main">
+      <div class="log-header">
+        <div class="section-label" style="margin:0">Activity Log</div>
+        <span id="log-count" class="badge" style="margin-left:auto">0 entries</span>
+      </div>
+      <div class="log-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Counter</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="log-body">
+            <tr><td colspan="4" class="empty-log">No activity yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Modal -->
+  <div class="modal-backdrop" id="reset-modal" style="display:none">
+    <div class="modal">
+      <h2>Reset Queue?</h2>
+      <p>This will clear all active numbers, the log, and restart from #1. This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="modal-cancel">Cancel</button>
+        <button class="btn btn-confirm-reset" id="modal-confirm">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let state = {};
+
+    // ── Elements ──────────────────────────────────────────────────────────────
+    const $connStatus = document.getElementById('conn-status');
+    const $connDot    = document.getElementById('conn-dot');
+    const $stateBadge = document.getElementById('queue-state-badge');
+    const $btnStart   = document.getElementById('btn-start');
+    const $btnReset   = document.getElementById('btn-reset');
+    const $counters   = document.getElementById('counters-list');
+    const $logBody    = document.getElementById('log-body');
+    const $logCount   = document.getElementById('log-count');
+    const $modal      = document.getElementById('reset-modal');
+
+    // ── Connection ────────────────────────────────────────────────────────────
+    socket.on('connect', () => {
+      $connStatus.classList.add('connected');
+      $connDot.classList.add('on');
+    });
+
+    socket.on('disconnect', () => {
+      $connStatus.classList.remove('connected');
+      $connDot.classList.remove('on');
+    });
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    socket.on('state', s => {
+      state = s;
+      render();
+    });
+
+    function render() {
+      // Badge
+      $stateBadge.textContent = state.started ? 'Running' : 'Idle';
+      $stateBadge.className = 'badge ' + (state.started ? 'active' : '');
+
+      // Start btn
+      $btnStart.disabled = state.started;
+      $btnStart.textContent = state.started ? 'Queue Running' : 'Start Queue';
+
+      // Stats
+      const activeCount = Object.keys(state.activeNumbers || {}).length;
+      document.getElementById('stat-served').textContent = state.completedNumbers?.length ?? 0;
+      document.getElementById('stat-active').textContent = activeCount;
+      document.getElementById('stat-next').textContent = state.nextNumber ?? 1;
+      document.getElementById('stat-log').textContent = state.log?.length ?? 0;
+
+      // Counters
+      $counters.innerHTML = '';
+      (state.counters || []).forEach(c => {
+        const active = state.activeNumbers?.[c.id];
+        const div = document.createElement('div');
+        div.className = 'counter-item' + (c.enabled ? '' : ' disabled-counter');
+        div.innerHTML = `
+          <div class="counter-num">${c.id}</div>
+          <div class="counter-info">
+            <input class="counter-name-input" data-id="${c.id}" value="${c.name}" maxlength="30" />
+            <div class="counter-serving ${active !== undefined ? 'active' : ''}">
+              ${active !== undefined ? `Serving #${active}` : 'No active number'}
+            </div>
+          </div>
+          <button class="toggle-btn ${c.enabled ? 'enabled' : ''}" data-id="${c.id}">
+            ${c.enabled ? 'ON' : 'OFF'}
+          </button>
+        `;
+        $counters.appendChild(div);
+      });
+
+      // Name inputs
+      $counters.querySelectorAll('.counter-name-input').forEach(input => {
+        input.addEventListener('change', () => {
+          socket.emit('admin:renameCounter', {
+            counterId: parseInt(input.dataset.id),
+            name: input.value,
+          });
+        });
+      });
+
+      // Toggle buttons
+      $counters.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          socket.emit('admin:toggleCounter', { counterId: parseInt(btn.dataset.id) });
+        });
+      });
+
+      // Log
+      const log = state.log || [];
+      $logCount.textContent = `${log.length} ${log.length === 1 ? 'entry' : 'entries'}`;
+
+      if (!log.length) {
+        $logBody.innerHTML = '<tr><td colspan="4" class="empty-log">No activity yet.</td></tr>';
+        return;
+      }
+
+      $logBody.innerHTML = log.map(entry => {
+        const time = new Date(entry.timestamp).toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const statusClass = entry.status === 'Completed' ? 'done' : 'pending';
+        return `
+          <tr>
+            <td><span class="log-num">${entry.number}</span></td>
+            <td>${entry.counterName}</td>
+            <td>${time}</td>
+            <td><span class="badge ${statusClass}">${entry.status}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ── Controls ──────────────────────────────────────────────────────────────
+    $btnStart.addEventListener('click', () => socket.emit('queue:start'));
+
+    $btnReset.addEventListener('click', () => $modal.style.display = 'flex');
+
+    document.getElementById('modal-cancel').addEventListener('click', () => {
+      $modal.style.display = 'none';
+    });
+
+    document.getElementById('modal-confirm').addEventListener('click', () => {
+      socket.emit('queue:reset');
+      $modal.style.display = 'none';
+    });
+
+    // Close modal on backdrop click
+    $modal.addEventListener('click', e => {
+      if (e.target === $modal) $modal.style.display = 'none';
+    });
+  </script>
+  </div>
+</body>
+</html>
