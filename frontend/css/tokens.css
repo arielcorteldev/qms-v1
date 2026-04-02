@@ -1,0 +1,236 @@
+:root {
+    /* Spacing Scale (16px base) */
+    --spacing-0: 4px;      /* 0.25rem */
+    --spacing-1: 8px;      /* 0.5rem */
+    --spacing-2: 12px;     /* 0.75rem */
+    --spacing-3: 16px;     /* 1rem */
+    --spacing-4: 24px;     /* 1.5rem */
+    --spacing-5: 32px;     /* 2rem */
+    --spacing-6: 48px;     /* 3rem */
+    --spacing-7: 64px;     /* 4rem */
+    --spacing-8: 96px;     /* 6rem */
+    --spacing-9: 128px;    /* 8rem */
+    --spacing-10: 192px;   /* 12rem */
+    --spacing-11: 256px;   /* 16rem */
+    --spacing-12: 384px;   /* 24rem */
+    --spacing-13: 512px;   /* 32rem */
+    --spacing-14: 640px;   /* 40rem */
+    --spacing-15: 768px;   /* 48rem */
+
+    /* Base Type Scale (numbered) */
+    --font-size-0: 12px;   /* 0.75rem */
+    --font-size-1: 14px;   /* 0.875rem */
+    --font-size-2: 16px;   /* 1rem */
+    --font-size-3: 18px;   /* 1.125rem */
+    --font-size-4: 20px;   /* 1.25rem */
+    --font-size-5: 24px;   /* 1.5rem */
+    --font-size-6: 30px;   /* 1.875rem */
+    --font-size-7: 36px;   /* 2.25rem */
+    --font-size-8: 48px;   /* 3rem */
+    --font-size-9: 60px;   /* 3.75rem */
+    --font-size-10: 72px;  /* 4.5rem */
+
+    /* Font Families */
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-heading: 'Syne', sans-serif;
+
+    /* Mobile Sizes (Default - Mobile First) */
+    --font-size-h1-mobile: var(--font-size-8);  /* 48px */ 
+    --font-size-h2-mobile: var(--font-size-7);  /* 36px */
+    --font-size-h3-mobile: var(--font-size-6);  /* 30px */
+    --font-size-h4-mobile: var(--font-size-5);  /* 24px */
+    --font-size-h5-mobile: var(--font-size-4);  /* 20px */
+    --font-size-h6-mobile: var(--font-size-3);  /* 18px */
+  
+    /* Desktop Sizes */
+    --font-size-h1-desktop: var(--font-size-10); /* 72px */
+    --font-size-h2-desktop: var(--font-size-9);  /* 60px */
+    --font-size-h3-desktop: var(--font-size-8);  /* 48px */
+    --font-size-h4-desktop: var(--font-size-7);  /* 36px */
+    --font-size-h5-desktop: var(--font-size-6);  /* 30px */
+    --font-size-h6-desktop: var(--font-size-5);  /* 24px */ 
+  
+    /* Active Sizes (start with mobile) */
+    --font-size-h1: var(--font-size-h1-mobile);
+    --font-size-h2: var(--font-size-h2-mobile);
+    --font-size-h3: var(--font-size-h3-mobile);
+    --font-size-h4: var(--font-size-h4-mobile);
+    --font-size-h5: var(--font-size-h5-mobile);
+    --font-size-h6: var(--font-size-h6-mobile);
+
+    /* Body Text Sizes (same on mobile/desktop usually) */
+    --font-size-body: var(--font-size-2);      /* 16px */
+    --font-size-body-xs: var(--font-size-0);  /* 12px */
+    --font-size-body-sm: var(--font-size-1);   /* 14px */
+    --font-size-body-md: var(--font-size-3);   /* 18px */
+    --font-size-body-lg: var(--font-size-4);   /* 20px */
+
+    /* Font Weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Line Heights */
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* Brand Colors */
+
+    /* Primary */
+    --color-primary-900: #0E0102;
+    --color-primary-800: #350811;
+    --color-primary-700: #611625;
+    --color-primary-600: #92253B;
+    --color-primary-500: #C53653;
+    --color-primary-400: #D66473;
+    --color-primary-300: #E48C94;
+    --color-primary-200: #EFB2B7; 
+    --color-primary-100: #F9D9DA;
+
+    /* Neutrals */
+    --color-neutral-900: #0F1011;
+    --color-neutral-800: #38393B;
+    --color-neutral-700: #66686B;
+    --color-neutral-600: #989B9F;
+    --color-neutral-500: #CED2D7;
+    --color-neutral-400: #D8DBDF;
+    --color-neutral-300: #E1E4E7;
+    --color-neutral-200: #EBEDEF;
+    --color-neutral-100: #F5F6F7;
+     
+
+    /* Accents */
+    --color-accent-red-950: #460809;
+    --color-accent-red-900: #82181A;
+    --color-accent-red-800: #9F0712;
+    --color-accent-red-700: #C10007;
+    --color-accent-red-600: #E7000B;
+    --color-accent-red-500: #FB2C36;
+    --color-accent-red-400: #FF6467;
+    --color-accent-red-300: #FFA2A2;
+    --color-accent-red-200: #FFC9C9;
+    --color-accent-red-100: #FFE2E2;
+    --color-accent-red-50: #FEF2F2;
+
+    --color-accent-green-950: #032E15;
+    --color-accent-green-900: #0D542B;
+    --color-accent-green-800: #016630;
+    --color-accent-green-700: #008236;
+    --color-accent-green-600: #00A63E;
+    --color-accent-green-500: #00C950;
+    --color-accent-green-400: #05DF72;
+    --color-accent-green-300: #7BF1A8;
+    --color-accent-green-200: #B9F8CF;
+    --color-accent-green-100: #DCFCE7;
+    --color-accent-green-50: #F0FDF4;
+
+    --color-accent-yellow-950: #461901;
+    --color-accent-yellow-900: #7B3306;
+    --color-accent-yellow-800: #973C00;
+    --color-accent-yellow-700: #BB4D00;
+    --color-accent-yellow-600: #E17100;
+    --color-accent-yellow-500: #FE9A00;
+    --color-accent-yellow-400: #FFB900;
+    --color-accent-yellow-300: #FFD230;
+    --color-accent-yellow-200: #FEE685;
+    --color-accent-yellow-100: #FEF3C6;
+    --color-accent-yellow-50: #FFFBEB;
+
+    --color-accent-pink-950: #4E0055;
+    --color-accent-pink-900: #75117E;
+    --color-accent-pink-800: #8C0E9A;
+    --color-accent-pink-700: #A90EBD;
+    --color-accent-pink-600: #CE1FEA;
+    --color-accent-pink-500: #DF36FF;
+    --color-accent-pink-400: #ED6DFF;
+    --color-accent-pink-300: #F2A3FF;
+    --color-accent-pink-200: #F7CCFF;
+    --color-accent-pink-100: #FAE6FF;
+    --color-accent-pink-50: #FEF3FF;
+
+     /* ==================== */
+    /* SEMANTIC ALIASES     */
+    /* (Use these in code)  */
+    /* ==================== */
+    
+    /* States */
+    --color-error: var(--color-accent-red-500);
+    --color-sucess: var(var(--color-accent-green-400));
+
+
+    /* SHADOWS */
+    /* 
+    SHADOW SCALE REFERENCE:
+    --shadow-xs:  Subtle, barely visible (hover states, input focus)
+    --shadow-sm:  Light elevation (buttons, small cards)
+    --shadow-md:  Medium elevation (cards, panels) ← DEFAULT
+    --shadow-lg:  High elevation (dropdowns, popovers)
+    --shadow-xl:  Highest elevation (modals, dialogs)
+  */
+
+    /* Base Shadows */
+    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 15px 35px rgba(0, 0, 0, 0.3);
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 24px;
+
+    /* Transitions */
+    --duration-fast: 150ms;
+    --duration-normal: 300ms;
+    --duration-slow: 500ms;
+    
+    
+    /* ==================== */
+    /* GRID SYSTEM          */
+    /* ==================== */
+    
+    /* Grid Configuration */
+    --grid-cols: 8;
+    --grid-margin: var(--spacing-4);   /* 24px - references spacing */
+    --grid-gutter: var(--spacing-3);   /* 16px - references spacing */
+    
+    /* Semantic Aliases */
+    --layout-padding-x: var(--grid-margin);
+    --gap-default: var(--grid-gutter);
+    
+    /* Container */
+    --container-max: 100%;
+
+    @media (min-width: 768px) {
+        :root {
+          --grid-cols: 12;
+          --grid-margin: var(--spacing-5);   /* 32px */
+          --grid-gutter: var(--spacing-4);   /* 24px */
+          --container-max: 1024px;
+        }
+    }
+      
+    @media (min-width: 1024px) {
+        :root {
+          --grid-cols: 12;
+          --grid-margin: var(--spacing-6);   /* 48px */
+          --grid-gutter: var(--spacing-5);   /* 32px */
+          --container-max: 1280px;
+        }
+    }
+
+    /* .container {
+        padding: 0 var(--layout-padding-x); 
+      }
+      
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(var(--grid-cols), 1fr);  
+        gap: var(--gap-default);  
+    } 
+    */
+
+}
