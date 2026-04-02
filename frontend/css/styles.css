@@ -297,39 +297,42 @@ html, body {
 .route-card {
   display: block;
   text-decoration: none;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  background: var(--color-neutral-500);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 1.25rem 1.5rem;
   text-align: left;
-  transition: border-color 0.15s, background 0.15s;
+  transition: all 0.15s;
   cursor: pointer;
 }
 
 .route-card:hover {
-  border-color: var(--border);
-  background: var(--accent);
+  background: var(--color-primary-200);
 }
 
 .route-card .tag {
-  font-size: 0.6rem;
-  letter-spacing: 0.15em;
+  font-size: var(--font-size-body-xs);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-normal);
   text-transform: uppercase;
-  color: var(--text2);
-  margin-bottom: 0.25rem;
+  color: var(--color-neutral-800);
+  margin-bottom:var(--spacing-2);
 }
 
 .route-card .name {
-  font-family: var(--display);
-  font-size: 1.1rem;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h6-desktop);
   font-weight: 700;
-  color: var(--text);
+  color: var(--color-primary-500);
+  text-transform: uppercase;
 }
 
 .route-card .desc {
-  font-size: 0.72rem;
-  color: var(--text2);
-  margin-top: 0.25rem;
+  font-size: var(--font-size-body-xs);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-neutral-800);
+  margin-top: var(--spacing-2);
 }
 
 .counter-sub {
@@ -342,20 +345,19 @@ html, body {
 .counter-btn {
   display: block;
   text-decoration: none;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 3px;
+  background: var(--color-neutral-200);
+  border-radius: var(--radius-sm);
   padding: 0.5rem;
   text-align: center;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--text);
-  transition: border-color 0.15s, color 0.15s;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-xs);
+  color: var(--color-primary-800);
+  transition: all 0.15s;
 }
 
 .counter-btn:hover {
-  border-color: var(--border);
-  color: var(--accent);
+  color: var(--color-neutral-100);
+  background-color: var(--color-primary-500);
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
