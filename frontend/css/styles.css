@@ -262,26 +262,27 @@ html, body {
 }
 
 .hub-label {
-  font-family: var(--);
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-800);
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-1);
 }
 
 .hub h1 {
-  font-family: var(--display);
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  font-weight: 800;
-  color: var(--accent);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h1-desktop);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-500);
   line-height: 1;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--spacing-1)
 }
 
 .hub .sub {
-  font-size: 0.75rem;
-  color: var(--text2);
+    font-family: var(--font-body);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-neutral-800);
   margin-bottom: 3rem;
   letter-spacing: 0.05em;
 }
