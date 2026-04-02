@@ -65,45 +65,45 @@ html, body {
 /* ── Badge ─────────────────────────────────────────────────────────────────── */
 .badge {
   display: inline-block;
-  font-family: var(--mono);
-  font-size: 0.6rem;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-xs);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   padding: 0.2em 0.6em;
-  border-radius: 2px;
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-500);
+  color: var(--color-neutral-800);
+  border: 1px solid var(--color-neutral-800);
 }
 
 .badge.active {
-  background: color-mix(in srgb, var(--green) 15%, transparent);
-  color: var(--green);
-  border-color: var(--green);
+  background: color-mix(in srgb, var(--color-accent-green-500) 15%, transparent);
+  color: var(--color-accent-green-500);
+  border: 1px solid var(--color-accent-green-500);
 }
 
 .badge.pending {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
-  border-color: var(--accent);
+  background: color-mix(in srgb, var(--color-accent-yellow-500) 12%, transparent);
+  color: var(--color-accent-yellow-500);
+  border: 1px solid var(--color-accent-yellow-500);
 }
 
 .badge.done {
-  background: color-mix(in srgb, var(--muted) 10%, transparent);
-  color: var(--muted);
-  border-color: var(--border);
+  background: color-mix(in srgb, var(--color-accent-green-500) 10%, transparent);
+  color: var(--color-accent-green-500);
+  border: 1px solid var(--color-accent-green-500);
 }
 
 .badge.error {
-  background: color-mix(in srgb, var(--red) 15%, transparent);
-  color: var(--red);
-  border-color: var(--red);
+  background: color-mix(in srgb, var(--color-accent-red-500) 15%, transparent);
+  color: var(--color-accent-red-500);
+  border: 1px solid var(--color-accent-red-500);
 }
 
 .badge.disabled {
-  background: color-mix(in srgb, var(--red) 10%, transparent);
-  color: var(--red);
-  border-color: var(--red);
+  background: color-mix(in srgb, var(--color-accent-red-500) 10%, transparent);
+  color: var(--color-accent-red-500);
+  border: 1px solid var(--color-accent-red-500);
 }
 
 /* ── Pill ──────────────────────────────────────────────────────────────────── */
@@ -157,48 +157,49 @@ html, body {
 }
 
 .btn-start {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--accent);
-  font-size: 0.75rem;
+  background: var(--color-primary-500);
+  color: var(--color-neutral-100);
+  border-color: var(--color-primary-500);
+  font-size:var(--font-size-body-sm);
   padding: 0.7rem 1rem;
 }
 
 .btn-start:hover:not(:disabled) {
-  background: var(--accent);
+  background: var(--color-primary-600);
 }
 
 .btn-reset {
   background: transparent;
-  color: var(--red);
-  border-color: var(--red);
-  font-size: 0.75rem;
+  color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  font-size: var(--font-size-body-sm);
   padding: 0.7rem 1rem;
 }
 
 .btn-reset:hover:not(:disabled) {
-  border-color: var(--text);
-  color: var(--text);
+  background-color: var(--color-primary-500);
+  color: var(--color-neutral-100);
 }
 
 .btn-confirm-reset {
-  background: var(--red);
+  background: var(--color-accent-red-500);
   color: white;
-  border-color: var(--red);
+  border-color: var(--color-accent-red-500);
 }
 
 .btn-confirm-reset:hover {
-  background: #e03030;
+  background: var(--color-accent-red-700);
 }
 
 .btn-cancel {
   background: transparent;
-  color: var(--text2);
-  border-color: var(--border2);
+  color: var(--color-neutral-800);
+  border-color: var(--color-neutral-800);
 }
 
 .btn-cancel:hover {
-  border-color: var(--text2);
+  border-color: var(--color-neutral-600);
+  color: var(--color-neutral-600);
 }
 
 /* ── Status Dot ────────────────────────────────────────────────────────────── */
@@ -274,7 +275,7 @@ html, body {
 
 .hub h1 {
   font-family: var(--font-heading);
-  font-size: var(--font-size-h1-desktop);
+  font-size: 128px;
   font-weight: var(--font-weight-bold);
   color: var(--color-primary-500);
   line-height: 1;
@@ -601,17 +602,18 @@ html, body {
   align-items: center;
   gap: 1rem;
   padding: 0.85rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-neutral-500);
 }
 
 .header-title {
-  font-family: var(--display);
-  font-size: 1rem;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-800);
   font-weight: 700;
 }
 
 .header-title span {
-  color: var(--accent2);
+  color: var(--color-primary-500);
 }
 
 /* ── Admin Layout ──────────────────────────────────────────────────────────── */
@@ -624,7 +626,7 @@ html, body {
 
 /* ── Admin Sidebar ─────────────────────────────────────────────────────────── */
 .admin-sidebar {
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--color-neutral-500);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -633,11 +635,11 @@ html, body {
 }
 
 .section-label {
-  font-family: var(--display);
-  font-size: 0.9rem;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-body);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--text2);
+  color: var(--color-neutral-800);
   margin-bottom: 0.75rem;
 }
 
@@ -649,24 +651,24 @@ html, body {
 }
 
 .stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  background: var(--color-neutral-500);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
   padding: 0.85rem;
 }
 
 .stat-card .val {
-  font-family: var(--display);
-  font-size: 1.8rem;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h6-desktop);
   font-weight: 800;
-  color: var(--accent);
+  color: var(--color-primary-500);
   line-height: 1;
 }
 
 .stat-card .lbl {
-  font-size: 0.65rem;
-  color: var(--text);
-  font-family: var(--mono);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-neutral-800);
+  font-family: var(--font-body);
   margin-top: 0.25rem;
 }
 
@@ -679,9 +681,9 @@ html, body {
 
 /* ── Counter Items ─────────────────────────────────────────────────────────── */
 .counter-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  background: var(--color-neutral-500);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 0.85rem;
   display: flex;
   align-items: center;
@@ -693,10 +695,10 @@ html, body {
 }
 
 .counter-num {
-  font-family: var(--display);
-  font-size: 1.4rem;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-body-lg);
   font-weight: 800;
-  color: var(--accent);
+  color: var(--color-primary-500);
   min-width: 2rem;
   text-align: center;
 }
@@ -708,10 +710,10 @@ html, body {
 .counter-name-input {
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
+  border-bottom: 1px solid var(--color-neutral-800);
+  color: var(--color-neutral-800);
   font-family: var(--body);
-  font-size: 0.85rem;
+  font-size: var(--font-size-body-sm);
   width: 100%;
   padding: 0.1rem 0;
   outline: none;
@@ -719,40 +721,40 @@ html, body {
 }
 
 .counter-name-input:focus {
-  border-color: var(--accent);
+  border-color: var(--color-primary-500);
 }
 
 .counter-serving {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-xs);
+  color: var(--color-neutral-800);
   margin-top: 0.2rem;
 }
 
 .counter-serving.active {
-  color: var(--green);
+  color: var(--color-accent-green-500);
 }
 
 .toggle-btn {
-  font-family: var(--mono);
-  font-size: 0.6rem;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-xs);
   padding: 0.25rem 0.6rem;
   border-radius: 3px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-neutral-800);
   background: transparent;
-  color: var(--text);
+  color: var(--color-neutral-800);
   cursor: pointer;
   transition: all 0.12s;
 }
 
 .toggle-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--color-primary-500);
+  color: var(--color-primary-500);
 }
 
 .toggle-btn.enabled {
-  color: var(--green);
-  border-color: var(--green);
+  color: var(--color-accent-green-500);
+  border-color: var(--color-accent-green-500);
   border-width: 2px;
   font-weight: 700;
 }
@@ -775,9 +777,9 @@ html, body {
 .log-table-wrap {
   flex: 1;
   overflow-y: auto;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  background: var(--color-neutral-500);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 table {
@@ -787,26 +789,26 @@ table {
 }
 
 thead th {
-  font-family: var(--mono);
-  font-size: 0.6rem;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-xs);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-neutral-800);
   padding: 0.6rem 1rem;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-neutral-600);
   position: sticky;
   top: 0;
-  background: var(--surface);
+  background: var(--color-neutral-500);
 }
 
 tbody tr {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-neutral-600);
   transition: background 0.1s;
 }
 
 tbody tr:hover {
-  background: var(--surface2);
+  background: var(--color-primary-300);
 }
 
 tbody tr:last-child {
@@ -815,24 +817,24 @@ tbody tr:last-child {
 
 tbody td {
   padding: 0.55rem 1rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--text2);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-xs);
+  color: var(--color-neutral-800);
 }
 
 .log-num {
-  font-family: var(--display);
-  font-size: 1.1rem;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-body-md);
   font-weight: 700;
-  color: var(--accent);
+  color: var(--color-primary-500);
 }
 
 .empty-log {
   text-align: center;
   padding: 3rem;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--border2);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-xs);
+  color: var(--color-neutral-800);
 }
 
 /* ── Modal ─────────────────────────────────────────────────────────────────── */
@@ -848,9 +850,9 @@ tbody td {
 }
 
 .modal {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 6px;
+  background: var(--color-neutral-500);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-md);
   padding: 2rem;
   max-width: 360px;
   width: 90%;
@@ -858,15 +860,15 @@ tbody td {
 }
 
 .modal h2 {
-  font-family: var(--display);
-  font-size: 1.3rem;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-body-lg);
   margin-bottom: 0.5rem;
-  color: var(--red);
+  color: var(--color-primary-500);
 }
 
 .modal p {
-  font-size: 0.8rem;
-  color: var(--muted);
+  font-size: var(--font-size-body-xs);
+  color: var(--color-neutral-800);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
