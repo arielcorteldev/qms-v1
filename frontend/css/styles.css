@@ -18,24 +18,24 @@
    ════════════════════════════════════════════════════════════════════════════ */
 :root {
   /* Backgrounds */
-  --bg:       #0d0d0f;
-  --surface:  #16161a;
-  --surface2: #1e1e26;
+  --bg:       #F3F2F8;
+  --surface:  #d0cfd4;
+  --surface2: #19191a;
 
   /* Borders */
-  --border:   #2a2a32;
-  --border2:  #3a3a46;
+  --border:   #333334;
+  --border2:  #4f4f51;
 
   /* Semantic Colors */
-  --accent:   #e8ff47;     /* lime green - primary action */
+  --accent:   #DB1A1A;     /* lime green - primary action */
   --accent2:  #ff6b35;     /* orange - secondary highlight */
-  --green:    #39d98a;     /* success / active state */
+  --green:    #00b424;     /* success / active state */
   --red:      #ff4d4d;     /* error / danger */
 
   /* Text */
-  --text:     #f0f0f0;
-  --text2:    #c0c0c8;
-  --muted:    #666;
+  --text:     #19191a;
+  --text2:    #4f4f51;
+  --muted:    #d0cfd4;
 
   /* Typography */
   --mono:     'DM Mono', monospace;
@@ -71,8 +71,8 @@ html, body {
   text-transform: uppercase;
   padding: 0.2em 0.6em;
   border-radius: 2px;
-  background: var(--surface2);
-  color: var(--muted);
+  background: var(--surface);
+  color: var(--text);
   border: 1px solid var(--border);
 }
 
@@ -155,7 +155,7 @@ html, body {
 }
 
 .btn-start {
-  background: var(--accent);
+  background: var(--text);
   color: var(--bg);
   border-color: var(--accent);
   font-size: 0.75rem;
@@ -163,7 +163,7 @@ html, body {
 }
 
 .btn-start:hover:not(:disabled) {
-  background: #d4eb30;
+  background: var(--accent);
 }
 
 .btn-reset {
@@ -175,7 +175,8 @@ html, body {
 }
 
 .btn-reset:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--red) 10%, transparent);
+  border-color: var(--text);
+  color: var(--text);
 }
 
 .btn-confirm-reset {
@@ -264,7 +265,7 @@ html, body {
   font-family: var(--mono);
   font-size: 0.7rem;
   letter-spacing: 0.2em;
-  color: var(--muted);
+  color: var(--text);
   text-transform: uppercase;
   margin-bottom: 0.5rem;
 }
@@ -280,7 +281,7 @@ html, body {
 
 .hub .sub {
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--text2);
   margin-bottom: 3rem;
   letter-spacing: 0.05em;
 }
@@ -305,15 +306,15 @@ html, body {
 }
 
 .route-card:hover {
-  border-color: var(--accent);
-  background: #1c1c22;
+  border-color: var(--border);
+  background: var(--accent);
 }
 
 .route-card .tag {
   font-size: 0.6rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--text2);
   margin-bottom: 0.25rem;
 }
 
@@ -326,7 +327,7 @@ html, body {
 
 .route-card .desc {
   font-size: 0.72rem;
-  color: var(--muted);
+  color: var(--text2);
   margin-top: 0.25rem;
 }
 
@@ -347,13 +348,13 @@ html, body {
   text-align: center;
   font-family: var(--mono);
   font-size: 0.7rem;
-  color: var(--muted);
+  color: var(--text);
   transition: border-color 0.15s, color 0.15s;
 }
 
 .counter-btn:hover {
-  border-color: var(--accent2);
-  color: var(--accent2);
+  border-color: var(--border);
+  color: var(--accent);
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -621,11 +622,11 @@ html, body {
 }
 
 .section-label {
-  font-family: var(--mono);
-  font-size: 0.6rem;
+  font-family: var(--display);
+  font-size: 0.9rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text2);
   margin-bottom: 0.75rem;
 }
 
@@ -653,7 +654,7 @@ html, body {
 
 .stat-card .lbl {
   font-size: 0.65rem;
-  color: var(--muted);
+  color: var(--text);
   font-family: var(--mono);
   margin-top: 0.25rem;
 }
@@ -713,7 +714,7 @@ html, body {
 .counter-serving {
   font-family: var(--mono);
   font-size: 0.65rem;
-  color: var(--muted);
+  color: var(--text);
   margin-top: 0.2rem;
 }
 
@@ -726,21 +727,23 @@ html, body {
   font-size: 0.6rem;
   padding: 0.25rem 0.6rem;
   border-radius: 3px;
-  border: 1px solid var(--border2);
+  border: 1px solid var(--border);
   background: transparent;
-  color: var(--muted);
+  color: var(--text);
   cursor: pointer;
   transition: all 0.12s;
 }
 
 .toggle-btn:hover {
-  border-color: var(--text2);
-  color: var(--text2);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .toggle-btn.enabled {
   color: var(--green);
   border-color: var(--green);
+  border-width: 2px;
+  font-weight: 700;
 }
 
 /* ── Admin Main Area / Log ─────────────────────────────────────────────────── */
