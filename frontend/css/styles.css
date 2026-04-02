@@ -262,7 +262,7 @@ html, body {
 }
 
 .hub-label {
-  font-family: var(--mono);
+  font-family: var(--);
   font-size: 0.7rem;
   letter-spacing: 0.2em;
   color: var(--text);
