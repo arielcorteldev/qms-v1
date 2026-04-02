@@ -893,25 +893,25 @@ tbody td {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 3rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-neutral-500);
 }
 
 .screen-header h1 {
-  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-size: var(--font-size-h5-desktop);
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--text);
-  font-family: var(--display);
+  color: var(--color-neutral-800);
+  font-family: var(--font-heading);
 }
 
 .screen-header h1 span {
-  color: var(--accent);
+  color: var(--color-primary-500);
 }
 
 .clock {
-  font-family: var(--mono);
-  font-size: clamp(1rem, 2.5vw, 1.4rem);
-  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-lg);
+  color: var(--color-neutral-800);
   letter-spacing: 0.05em;
 }
 
@@ -925,9 +925,9 @@ tbody td {
 }
 
 .counter-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--color-neutral-500);
+  border: 1px solid var(--color-neutral-800);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -946,44 +946,44 @@ tbody td {
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--border);
+  background: var(--color-neutral-800);
   transition: background 0.3s;
 }
 
 .counter-panel.has-number {
-  border-color: #2a2a38;
+  border-color: var(--color-primary-500);
 }
 
 .counter-panel.has-number::before {
-  background: var(--accent);
+  background: var(--color-primary-500);
 }
 
 .counter-panel-label {
-  font-family: var(--mono);
-  font-size: clamp(0.65rem, 1.5vw, 0.85rem);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-lg);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-neutral-800);
 }
 
 .counter-panel-name {
-  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-size: var(--font-size-body-md);
   font-weight: 700;
-  color: var(--text);
-  font-family: var(--display);
+  color: var(--color-neutral-800);
+  font-family: var(--font-heading);
 }
 
 .counter-number {
-  font-size: clamp(5rem, 18vw, 12rem);
+  font-size: 128px;
   font-weight: 800;
   line-height: 1;
-  color: var(--accent);
+  color: var(--color-primary-500);
   transition: transform 0.2s, opacity 0.2s;
-  font-family: var(--display);
+  font-family: var(--font-heading);
 }
 
 .counter-number.idle {
-  color: var(--border);
+  color: var(--color-neutral-800);
   font-size: clamp(2rem, 8vw, 5rem);
 }
 
@@ -998,13 +998,13 @@ tbody td {
 }
 
 .counter-status {
-  font-family: var(--mono);
-  font-size: clamp(0.6rem, 1.2vw, 0.8rem);
-  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-800);
 }
 
 .counter-status.serving {
-  color: var(--green);
+  color: var(--color-accent-green-500);
 }
 
 /* ── Display Footer ────────────────────────────────────────────────────────── */
@@ -1013,17 +1013,17 @@ tbody td {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 3rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-neutral-500);
 }
 
 .footer-stat {
-  font-family: var(--mono);
-  font-size: clamp(0.6rem, 1.5vw, 0.8rem);
-  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-800);
 }
 
 .footer-stat span {
-  color: var(--text);
+  color: var(--color-primary-500);
   font-weight: 500;
 }
 
@@ -1031,9 +1031,9 @@ tbody td {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-800);
 }
 
 /* ── Waiting Screen ────────────────────────────────────────────────────────── */
