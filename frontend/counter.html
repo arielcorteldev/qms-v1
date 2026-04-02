@@ -18,7 +18,7 @@
     </div>
     <div class="queue-status">
       <span class="dot" id="conn-dot"></span>
-      <span id="queue-info" style="margin-left:0.5rem;font-size:0.65rem;"></span>
+      <span id="queue-info"></span>
     </div>
   </header>
 
@@ -32,7 +32,7 @@
       <div style="text-align:center">
         <button class="btn btn-call" id="btn-call" disabled>Call Next</button>
         <div class="key-hint" style="margin-top:0.5rem">
-          <span class="key">Enter</span><span style="font-size:0.6rem;color:var(--muted)">/</span><span class="key">Space</span>
+          <span class="key">Enter</span><span style="font-size:0.6rem;color:var(--color-neutral-800)">/</span><span class="key">Space</span>
         </div>
       </div>
       <div style="text-align:center">
@@ -52,7 +52,7 @@
   <footer>
     <span class="dot on" id="status-dot" style="display:none"></span>
     <div id="toast"></div>
-    <span id="total-served" style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-left:auto;"></span>
+    <span id="total-served" style="font-family:var(--font-body);font-size:var(--font-size-body-xs);color:var(--color-neutral-800);margin-left:auto;"></span>
   </footer>
 
   <div class="not-started-overlay" id="not-started">

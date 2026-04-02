@@ -135,23 +135,25 @@ html, body {
 }
 
 .btn-call {
-  background: var(--accent);
-  color: var(--bg);
-  border-color: var(--accent);
+  background: var(--color-primary-500);
+  color: var(--color-neutral-100);
+  border-radius: var(--radius-md);
 }
 
 .btn-call:hover:not(:disabled) {
-  background: #d4eb30;
+  background: var(--color-primary-600);
 }
 
 .btn-done {
   background: transparent;
-  color: var(--green);
-  border-color: var(--green);
+  color: var(--color-accent-green-500);
+  border-color: var(--color-accent-green-500);
+  border-radius: var(--radius-md);
 }
 
 .btn-done:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--green) 10%, transparent);
+  background: var(--color-accent-green-500);
+  color: var(--color-neutral-100)
 }
 
 .btn-start {
@@ -380,25 +382,24 @@ html, body {
 }
 
 .header-id {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-primary-800);
 }
 
 .counter-name {
-  font-family: var(--display);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h4-desktop);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-500);
   flex: 1;
 }
 
 .queue-status {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-neutral-800);
 }
 
 /* ── Counter Main Area ─────────────────────────────────────────────────────── */
@@ -417,25 +418,25 @@ html, body {
 }
 
 .number-label {
-  font-family: var(--mono);
-  font-size: 0.65rem;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-sm);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-neutral-800);
   margin-bottom: 0.5rem;
 }
 
 .number-value {
-  font-family: var(--display);
+  font-family: var(--font-heading);
   font-size: clamp(6rem, 20vw, 11rem);
   font-weight: 800;
   line-height: 1;
-  color: var(--accent);
+  color: var(--color-primary-500);
   transition: transform 0.15s, opacity 0.15s;
 }
 
 .number-value.idle {
-  color: var(--border2);
+  color: var(--color-primary-500);
 }
 
 .number-value.pop {
@@ -463,11 +464,11 @@ html, body {
 }
 
 .key {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--muted);
-  border: 1px solid var(--border2);
-  border-radius: 3px;
+  font-family: var(--font-body);
+  font-size:var(--font-size-body-xs);
+  color: var(--color-primary-800);
+  border: 1px solid var(--color-primary-800);
+  border-radius: var(--radius-md);
   padding: 0.1em 0.45em;
 }
 
@@ -478,11 +479,11 @@ html, body {
 }
 
 .others-label {
-  font-family: var(--mono);
-  font-size: 0.6rem;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-sm);
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-neutral-800);
   margin-bottom: 0.75rem;
 }
 
@@ -493,39 +494,46 @@ html, body {
 }
 
 .other-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  background: var(--color-neutral-500);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 0.75rem;
   text-align: center;
   transition: border-color 0.2s;
 }
 
 .other-card.has-active {
-  border-color: var(--border2);
+  border-color: var(--color-primary-500);
 }
 
 .other-card.is-me {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  background-color: var(--color-primary-500);
+}
+
+.other-card.is-me > * {
+    color: var(--color-neutral-100);
+}
+
+.other-card.is-me .other-card-num.empty {
+    color: var(--color-neutral-100);
 }
 
 .other-card-name {
-  font-size: 0.65rem;
-  color: var(--muted);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-neutral-800);
   margin-bottom: 0.35rem;
-  font-family: var(--mono);
+  font-family: var(--font-body);
 }
 
 .other-card-num {
-  font-family: var(--display);
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--text2);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h6-desktop);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-800);
 }
 
 .other-card-num.empty {
-  color: var(--border2);
+  color: var(--color-primary-800);
   font-size: 1rem;
 }
 
@@ -540,9 +548,9 @@ html, body {
 
 #toast {
   flex: 1;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--red);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-xs);
+  color: var(--color-accent-red-500);
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -566,15 +574,15 @@ html, body {
 }
 
 .not-started-overlay h2 {
-  font-family: var(--display);
-  font-size: 1.5rem;
-  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2-desktop);
+  color: var(--color-primary-500);
 }
 
 .not-started-overlay p {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--border2);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-800);
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
