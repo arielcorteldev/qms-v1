@@ -79,15 +79,15 @@
     /* Brand Colors */
 
     /* Primary */
-    --color-primary-900: #0E0102;
-    --color-primary-800: #350811;
-    --color-primary-700: #611625;
-    --color-primary-600: #92253B;
-    --color-primary-500: #C53653;
-    --color-primary-400: #D66473;
-    --color-primary-300: #E48C94;
-    --color-primary-200: #EFB2B7; 
-    --color-primary-100: #F9D9DA;
+    --color-primary-900: #4F0000;
+    --color-primary-800: #770000;
+    --color-primary-700: #A20001;
+    --color-primary-600: #CF0001;
+    --color-primary-500: #FE0002;
+    --color-primary-400: #FF4E3E;
+    --color-primary-300: #FF7361;
+    --color-primary-200: #FF9282; 
+    --color-primary-100: #FFAFA1;
 
     /* Neutrals */
     --color-neutral-900: #0F1011;

@@ -264,6 +264,12 @@ html, body {
   min-height: 100vh;
 }
 
+.hub-logos {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
 .hub-label {
   font-family: var(--font-body);
   font-weight: var(--font-weight-bold);
