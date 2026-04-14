@@ -37,6 +37,80 @@
     let state = {};
     let prevActive = {};
 
+    // ── Voice announcements (Display only) ─────────────────────────────────────
+    const audioQueue = [];
+    let isSpeaking = false;
+
+    socket.on('number:called', (payload) => {
+      if (!payload || typeof payload !== 'object') return;
+      const { number, counterName, timestamp } = payload;
+      if (!Number.isInteger(number)) return;
+      if (typeof counterName !== 'string') return;
+      if (typeof timestamp !== 'number') return;
+
+      audioQueue.push({ number, counterName, timestamp });
+      processAudioQueue();
+    });
+
+    async function processAudioQueue() {
+      if (isSpeaking) return;
+      isSpeaking = true;
+
+      try {
+        while (audioQueue.length) {
+          const item = audioQueue.shift();
+          try {
+            await speakCalledNumber(item, 0);
+          } catch (_) {
+            try {
+              await speakCalledNumber(item, 1);
+            } catch (_) {
+              // Skip after one retry; continue queue.
+            }
+          }
+        }
+      } finally {
+        isSpeaking = false;
+      }
+    }
+
+    function speakCalledNumber({ number, counterName }, attempt) {
+      return new Promise((resolve, reject) => {
+        if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+          return reject(new Error('speech not supported'));
+        }
+
+        const text = `Number ${number}, you may now proceed at ${counterName}`;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+
+        const voices = window.speechSynthesis.getVoices?.() || [];
+        const enVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('en'));
+        if (enVoice) u.voice = enVoice;
+
+        const watchdogMs = 12000;
+        const watchdog = setTimeout(() => reject(new Error('speech timeout')), watchdogMs);
+
+        u.onend = () => {
+          clearTimeout(watchdog);
+          resolve();
+        };
+        u.onerror = () => {
+          clearTimeout(watchdog);
+          reject(new Error('speech error'));
+        };
+
+        setTimeout(() => {
+          try {
+            window.speechSynthesis.speak(u);
+          } catch (e) {
+            clearTimeout(watchdog);
+            reject(e);
+          }
+        }, 500);
+      });
+    }
+
     // ── Clock ─────────────────────────────────────────────────────────────────
     function tickClock() {
       document.getElementById('clock').textContent =
