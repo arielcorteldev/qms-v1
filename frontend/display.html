@@ -43,12 +43,12 @@
 
     socket.on('number:called', (payload) => {
       if (!payload || typeof payload !== 'object') return;
-      const { number, counterName, timestamp } = payload;
-      if (!Number.isInteger(number)) return;
+      const { ticket, lane, counterName, timestamp } = payload;
+      if (typeof ticket !== 'string') return;
       if (typeof counterName !== 'string') return;
       if (typeof timestamp !== 'number') return;
 
-      audioQueue.push({ number, counterName, timestamp });
+      audioQueue.push({ ticket, lane, counterName, timestamp });
       processAudioQueue();
     });
 
@@ -74,13 +74,16 @@
       }
     }
 
-    function speakCalledNumber({ number, counterName }, attempt) {
+    function speakCalledNumber({ ticket, lane, counterName }, attempt) {
       return new Promise((resolve, reject) => {
         if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
           return reject(new Error('speech not supported'));
         }
 
-        const text = `Number ${number}, you may now proceed at ${counterName}`;
+        const isPriority = lane === 'priority' || (typeof ticket === 'string' && ticket.startsWith('P'));
+        const text = isPriority
+          ? `Priority ${ticket.replace(/^P/, '')}, you may now proceed at ${counterName}`
+          : `Number ${ticket}, you may now proceed at ${counterName}`;
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US';
 
@@ -148,22 +151,25 @@
       // Rebuild layout
       area.innerHTML = '';
       counters.forEach(c => {
-        const num = activeNums[c.id];
-        const hasNum = num !== undefined;
-        const changed = hasNum && oldActive[c.id] !== num;
+        const active = activeNums[c.id];
+        const hasNum = active !== undefined;
+        const lane = active?.lane || (typeof active === 'string' && active.startsWith('P') ? 'priority' : 'regular');
+        const display = active?.display ?? active;
+        const changed = hasNum && ((oldActive[c.id]?.display ?? oldActive[c.id]) !== display);
 
         const panel = document.createElement('div');
-        panel.className = 'counter-panel' + (hasNum ? ' has-number' : '');
+        panel.className = 'counter-panel' + (hasNum ? ' has-number' : '') + (hasNum && lane === 'priority' ? ' priority' : '');
         panel.id = `panel-${c.id}`;
 
         panel.innerHTML = `
           <div class="counter-panel-label">Counter ${c.id}</div>
           <div class="counter-panel-name">${c.name}</div>
           <div class="counter-number ${hasNum ? '' : 'idle'}" id="num-${c.id}">
-            ${hasNum ? num : '·'}
+            ${hasNum ? display : '·'}
           </div>
+          ${hasNum && lane === 'priority' ? `<div class="priority-line">${display} — Counter ${c.id} — Priority</div>` : ''}
           <div class="counter-status ${hasNum ? 'serving' : ''}">
-            ${hasNum ? 'Now Serving' : (state.started ? 'Waiting…' : 'Idle')}
+            ${hasNum ? (lane === 'priority' ? 'Now Serving · Priority' : 'Now Serving') : (state.started ? 'Waiting…' : 'Idle')}
           </div>
         `;
 

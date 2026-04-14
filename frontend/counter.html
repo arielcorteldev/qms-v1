@@ -24,7 +24,10 @@
 
   <main>
     <div class="number-display">
-      <div class="number-label">Now Serving</div>
+      <div class="number-label">
+        Now Serving
+        <span class="badge lane-badge lane-priority" id="active-lane-badge" style="display:none;margin-left:0.5rem;vertical-align:middle">Priority</span>
+      </div>
       <div class="number-value idle" id="active-number">—</div>
     </div>
 
@@ -33,6 +36,12 @@
         <button class="btn btn-call" id="btn-call" disabled>Call Next</button>
         <div class="key-hint" style="margin-top:0.5rem">
           <span class="key">Enter</span><span style="font-size:0.6rem;color:var(--color-neutral-800)">/</span><span class="key">Space</span>
+        </div>
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-call btn-priority" id="btn-priority" disabled>Call Priority</button>
+        <div class="key-hint" style="margin-top:0.5rem">
+          <span class="key">P</span>
         </div>
       </div>
       <div style="text-align:center">
@@ -83,7 +92,9 @@
     const $counterIdLbl= document.getElementById('counter-id-label');
     const $counterName = document.getElementById('counter-name-label');
     const $activeNum   = document.getElementById('active-number');
+    const $laneBadge   = document.getElementById('active-lane-badge');
     const $btnCall     = document.getElementById('btn-call');
+    const $btnPriority = document.getElementById('btn-priority');
     const $btnDone     = document.getElementById('btn-done');
     const $othersGrid  = document.getElementById('others-grid');
     const $toast       = document.getElementById('toast');
@@ -115,6 +126,8 @@
       const counter = state.counters?.find(c => c.id === MY_ID);
       const myActive = state.activeNumbers?.[MY_ID];
       const hasActive = myActive !== undefined;
+      const myLane = myActive?.lane || (typeof myActive === 'string' && myActive.startsWith('P') ? 'priority' : 'regular');
+      const myDisplay = myActive?.display ?? myActive;
       const enabled = counter?.enabled ?? true;
 
       // Overlay
@@ -125,10 +138,12 @@
       $counterName.textContent = counter?.name || `Counter ${MY_ID}`;
 
       // Active number
-      const numChanged = myActive !== prevActive;
+      const numChanged = (myDisplay ?? '—') !== (prevActive?.display ?? prevActive ?? '—');
       if (hasActive) {
-        $activeNum.textContent = myActive;
+        $activeNum.textContent = myDisplay;
         $activeNum.classList.remove('idle');
+        $activeNum.classList.toggle('is-priority', myLane === 'priority');
+        $laneBadge.style.display = myLane === 'priority' ? '' : 'none';
         if (numChanged) {
           $activeNum.classList.remove('pop');
           void $activeNum.offsetWidth; // reflow
@@ -137,17 +152,22 @@
       } else {
         $activeNum.textContent = '—';
         $activeNum.classList.add('idle');
+        $activeNum.classList.remove('is-priority');
+        $laneBadge.style.display = 'none';
       }
 
       // Buttons
-      const canCall = state.started && enabled && !hasActive;
+      // Regular call is allowed if no active OR active is priority (auto-cancel + return priority).
+      const canCall = state.started && enabled && (!hasActive || myLane === 'priority');
+      const canPriority = state.started && enabled && !hasActive;
       const canDone = hasActive;
       $btnCall.disabled = !canCall;
+      $btnPriority.disabled = !canPriority;
       $btnDone.disabled = !canDone;
 
       // Queue info
       $queueInfo.textContent = state.started
-        ? `Next: #${state.nextNumber}`
+        ? `Next Regular: #${state.nextNumber} · Next Priority: P${state.nextPriority ?? 1}`
         : 'Idle';
 
       // Others grid
@@ -155,15 +175,18 @@
       (state.counters || []).forEach(c => {
         const active = state.activeNumbers?.[c.id];
         const isMe = c.id === MY_ID;
+        const lane = active?.lane || (typeof active === 'string' && active.startsWith('P') ? 'priority' : 'regular');
+        const display = active?.display ?? active;
         const card = document.createElement('div');
         card.className = [
           'other-card',
           active !== undefined ? 'has-active' : '',
+          active !== undefined && lane === 'priority' ? 'priority-active' : '',
           isMe ? 'is-me' : '',
         ].join(' ');
         card.innerHTML = `
           <div class="other-card-name">${c.name}${isMe ? ' (you)' : ''}${!c.enabled ? ' ·off' : ''}</div>
-          <div class="other-card-num ${active === undefined ? 'empty' : ''}">${active ?? '·'}</div>
+          <div class="other-card-num ${active === undefined ? 'empty' : ''}">${display ?? '·'}</div>
         `;
         $othersGrid.appendChild(card);
       });
@@ -177,6 +200,10 @@
       socket.emit('counter:callNext', { counterId: MY_ID });
     });
 
+    $btnPriority.addEventListener('click', () => {
+      socket.emit('counter:callPriority', { counterId: MY_ID });
+    });
+
     $btnDone.addEventListener('click', () => {
       socket.emit('counter:markDone', { counterId: MY_ID });
     });
@@ -187,6 +214,10 @@
       if ((e.key === 'Enter' || e.key === ' ') && !$btnCall.disabled) {
         e.preventDefault();
         socket.emit('counter:callNext', { counterId: MY_ID });
+      }
+      if ((e.key === 'p' || e.key === 'P') && !$btnPriority.disabled) {
+        e.preventDefault();
+        socket.emit('counter:callPriority', { counterId: MY_ID });
       }
       if (e.key === 'd' || e.key === 'D') {
         if (!$btnDone.disabled) socket.emit('counter:markDone', { counterId: MY_ID });

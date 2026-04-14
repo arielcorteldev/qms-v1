@@ -30,6 +30,14 @@
             <div class="lbl">Total Served</div>
           </div>
           <div class="stat-card">
+            <div class="val" id="stat-served-regular">0</div>
+            <div class="lbl">Regular Served</div>
+          </div>
+          <div class="stat-card">
+            <div class="val" id="stat-served-priority">0</div>
+            <div class="lbl">Priority Served</div>
+          </div>
+          <div class="stat-card">
             <div class="val" id="stat-active">0</div>
             <div class="lbl">Active Now</div>
           </div>
@@ -72,13 +80,14 @@
           <thead>
             <tr>
               <th>#</th>
+              <th>Lane</th>
               <th>Counter</th>
               <th>Time</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody id="log-body">
-            <tr><td colspan="4" class="empty-log">No activity yet.</td></tr>
+            <tr><td colspan="5" class="empty-log">No activity yet.</td></tr>
           </tbody>
         </table>
       </div>
@@ -89,7 +98,7 @@
   <div class="modal-backdrop" id="reset-modal" style="display:none">
     <div class="modal">
       <h2>Reset Queue?</h2>
-      <p>This will clear all active numbers, the log, and restart from #1. This cannot be undone.</p>
+      <p>This will clear all active numbers, the log, and restart both regular and priority lanes from 1. This cannot be undone.</p>
       <div class="modal-actions">
         <button class="btn btn-cancel" id="modal-cancel">Cancel</button>
         <button class="btn btn-confirm-reset" id="modal-confirm">Yes, Reset</button>
@@ -143,6 +152,8 @@
       // Stats
       const activeCount = Object.keys(state.activeNumbers || {}).length;
       document.getElementById('stat-served').textContent = state.completedNumbers?.length ?? 0;
+      document.getElementById('stat-served-regular').textContent = state.servedCounts?.regular ?? 0;
+      document.getElementById('stat-served-priority').textContent = state.servedCounts?.priority ?? 0;
       document.getElementById('stat-active').textContent = activeCount;
       document.getElementById('stat-next').textContent = state.nextNumber ?? 1;
       document.getElementById('stat-log').textContent = state.log?.length ?? 0;
@@ -151,6 +162,8 @@
       $counters.innerHTML = '';
       (state.counters || []).forEach(c => {
         const active = state.activeNumbers?.[c.id];
+        const lane = active?.lane || (typeof active === 'string' && active.startsWith('P') ? 'priority' : 'regular');
+        const display = active?.display ?? active;
         const div = document.createElement('div');
         div.className = 'counter-item' + (c.enabled ? '' : ' disabled-counter');
         div.innerHTML = `
@@ -158,7 +171,7 @@
           <div class="counter-info">
             <input class="counter-name-input" data-id="${c.id}" value="${c.name}" maxlength="30" />
             <div class="counter-serving ${active !== undefined ? 'active' : ''}">
-              ${active !== undefined ? `Serving #${active}` : 'No active number'}
+              ${active !== undefined ? `Serving ${display}${lane === 'priority' ? ' (Priority)' : ''}` : 'No active number'}
             </div>
           </div>
           <button class="toggle-btn ${c.enabled ? 'enabled' : ''}" data-id="${c.id}">
@@ -190,16 +203,19 @@
       $logCount.textContent = `${log.length} ${log.length === 1 ? 'entry' : 'entries'}`;
 
       if (!log.length) {
-        $logBody.innerHTML = '<tr><td colspan="4" class="empty-log">No activity yet.</td></tr>';
+        $logBody.innerHTML = '<tr><td colspan="5" class="empty-log">No activity yet.</td></tr>';
         return;
       }
 
       $logBody.innerHTML = log.map(entry => {
         const time = new Date(entry.timestamp).toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const statusClass = entry.status === 'Completed' ? 'done' : 'pending';
+        const lane = entry.lane === 'priority' ? 'priority' : 'regular';
+        const laneBadge = `<span class="badge lane-badge ${lane === 'priority' ? 'lane-priority' : 'lane-regular'}">${lane}</span>`;
         return `
           <tr>
-            <td><span class="log-num">${entry.number}</span></td>
+            <td><span class="log-num">${entry.ticket ?? entry.number}</span></td>
+            <td>${laneBadge}</td>
             <td>${entry.counterName}</td>
             <td>${time}</td>
             <td><span class="badge ${statusClass}">${entry.status}</span></td>
