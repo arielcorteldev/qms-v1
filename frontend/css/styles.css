@@ -4,7 +4,7 @@
    ════════════════════════════════════════════════════════════════════════════ */
 
 /* ── Font Imports ──────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Syne:wght@400..800&display=swap');
 
 /* ── Global Reset ──────────────────────────────────────────────────────────── */
 *, *::before, *::after {
@@ -14,42 +14,12 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   COLOR PALETTE & VARIABLES
-   ════════════════════════════════════════════════════════════════════════════ */
-:root {
-  /* Backgrounds */
-  --bg:       #F3F2F8;
-  --surface:  #d0cfd4;
-  --surface2: #19191a;
-
-  /* Borders */
-  --border:   #333334;
-  --border2:  #4f4f51;
-
-  /* Semantic Colors */
-  --accent:   #DB1A1A;     /* lime green - primary action */
-  --accent2:  #ff6b35;     /* orange - secondary highlight */
-  --green:    #00b424;     /* success / active state */
-  --red:      #ff4d4d;     /* error / danger */
-
-  /* Text */
-  --text:     #19191a;
-  --text2:    #4f4f51;
-  --muted:    #d0cfd4;
-
-  /* Typography */
-  --mono:     'DM Mono', monospace;
-  --display:  'Syne', sans-serif;
-  --body:     'Space Grotesk', sans-serif;
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
    BASE STYLES
    ════════════════════════════════════════════════════════════════════════════ */
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--body);
+  font-family: var(--font-body);
   min-height: 100vh;
 }
 
@@ -751,7 +721,7 @@ html, body {
   border: none;
   border-bottom: 1px solid var(--color-neutral-800);
   color: var(--color-neutral-800);
-  font-family: var(--body);
+  font-family: var(--font-body);
   font-size: var(--font-size-body-sm);
   width: 100%;
   padding: 0.1rem 0;
