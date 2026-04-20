@@ -758,7 +758,7 @@ html, body {
 
 .toggle-btn:hover {
   border-color: var(--color-primary-500);
-  color: var(--color-primary-500);
+  color: var(--color-primary-500); 
 }
 
 .toggle-btn.enabled {
