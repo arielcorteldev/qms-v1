@@ -603,7 +603,8 @@ html, body {
 .admin-page {
   display: grid;
   grid-template-rows: auto 1fr;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* ── Admin Header ──────────────────────────────────────────────────────────── */
@@ -630,7 +631,7 @@ html, body {
 .admin-layout {
   display: grid;
   grid-template-columns: 320px 1fr;
-  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -773,6 +774,7 @@ html, body {
 .admin-main {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   overflow: hidden;
   padding: 1.25rem;
 }
@@ -786,6 +788,7 @@ html, body {
 
 .log-table-wrap {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   background: var(--color-neutral-500);
   border-radius: var(--radius-md);
