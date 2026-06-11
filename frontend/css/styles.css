@@ -132,7 +132,7 @@ html, body {
 }
 
 .btn-priority:hover:not(:disabled) {
-  background: var(--color-accent-yellow-500);
+  background: var(--color-accent-yellow-600) !important;
 }
 
 .btn-call:hover:not(:disabled) {
@@ -312,7 +312,7 @@ html, body {
 }
 
 .route-card:hover {
-  background: var(--color-primary-200);
+  background: var(--color-neutral-200);
 }
 
 .route-card .tag {
@@ -350,13 +350,13 @@ html, body {
 .counter-btn {
   display: block;
   text-decoration: none;
-  background: var(--color-neutral-200);
+  background: inherit;
   border-radius: var(--radius-sm);
   padding: 0.5rem;
   text-align: center;
   font-family: var(--font-body);
   font-size: var(--font-size-body-xs);
-  color: var(--color-primary-800);
+  color: var(--color-primary-500);
   transition: all 0.15s;
 }
 
@@ -818,7 +818,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: var(--color-primary-300);
+  background: var(--color-neutral-300);
 }
 
 tbody tr:last-child {
