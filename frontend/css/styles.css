@@ -172,8 +172,9 @@ html, body {
 }
 
 .btn-reset:hover:not(:disabled) {
-  background-color: var(--color-primary-500);
-  color: var(--color-neutral-100);
+  background-color: var(--color-primary-200);
+  color: var(--color-primary-800);
+  border-color: var(--color-primary-200);
 }
 
 .btn-confirm-reset {
@@ -573,7 +574,7 @@ html, body {
 .not-started-overlay {
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
   display: flex;
   flex-direction: column;
   align-items: center;
