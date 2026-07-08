@@ -1,167 +1,188 @@
 :root {
-    /* Spacing Scale (16px base) */
-    --spacing-0: 4px;      /* 0.25rem */
-    --spacing-1: 8px;      /* 0.5rem */
-    --spacing-2: 12px;     /* 0.75rem */
-    --spacing-3: 16px;     /* 1rem */
-    --spacing-4: 24px;     /* 1.5rem */
-    --spacing-5: 32px;     /* 2rem */
-    --spacing-6: 48px;     /* 3rem */
-    --spacing-7: 64px;     /* 4rem */
-    --spacing-8: 96px;     /* 6rem */
-    --spacing-9: 128px;    /* 8rem */
-    --spacing-10: 192px;   /* 12rem */
-    --spacing-11: 256px;   /* 16rem */
-    --spacing-12: 384px;   /* 24rem */
-    --spacing-13: 512px;   /* 32rem */
-    --spacing-14: 640px;   /* 40rem */
-    --spacing-15: 768px;   /* 48rem */
+  /* Spacing Scale (16px base) */
+  --spacing-4: 4px; /* 0.25rem */
+  --spacing-8: 8px; /* 0.5rem */
+  --spacing-12: 12px; /* 0.75rem */
+  --spacing-16: 16px; /* 1rem */
+  --spacing-24: 24px; /* 1.5rem */
+  --spacing-32: 32px; /* 2rem */
+  --spacing-48: 48px; /* 3rem */
+  --spacing-64: 64px; /* 4rem */
+  --spacing-96: 96px; /* 6rem */
+  --spacing-128: 128px; /* 8rem */
+  --spacing-192: 192px; /* 12rem */
+  --spacing-256: 256px; /* 16rem */
+  --spacing-384: 384px; /* 24rem */
+  --spacing-512: 512px; /* 32rem */
+  --spacing-640: 640px; /* 40rem */
+  --spacing-768: 768px; /* 48rem */
 
-    /* Base Type Scale (numbered) */
-    --font-size-0: 12px;   /* 0.75rem */
-    --font-size-1: 14px;   /* 0.875rem */
-    --font-size-2: 16px;   /* 1rem */
-    --font-size-3: 18px;   /* 1.125rem */
-    --font-size-4: 20px;   /* 1.25rem */
-    --font-size-5: 24px;   /* 1.5rem */
-    --font-size-6: 30px;   /* 1.875rem */
-    --font-size-7: 36px;   /* 2.25rem */
-    --font-size-8: 48px;   /* 3rem */
-    --font-size-9: 60px;   /* 3.75rem */
-    --font-size-10: 72px;  /* 4.5rem */
+  /* Base Type Scale (numbered) */
+  --font-size-12: 12px; /* 0.75rem */
+  --font-size-14: 14px; /* 0.875rem */
+  --font-size-16: 16px; /* 1rem */
+  --font-size-18: 18px; /* 1.125rem */
+  --font-size-20: 20px; /* 1.25rem */
+  --font-size-24: 24px; /* 1.5rem */
+  --font-size-30: 30px; /* 1.875rem */
+  --font-size-36: 36px; /* 2.25rem */
+  --font-size-48: 48px; /* 3rem */
+  --font-size-60: 60px; /* 3.75rem */
+  --font-size-72: 72px; /* 4.5rem */
 
-    /* Font Families */
-    --font-body: 'Inter', sans-serif;
-    --font-heading: 'Syne', sans-serif;
+  /* Font Families */
+  --font-body: "Inter", sans-serif;
+  --font-heading: "Public Sans", sans-serif;
 
-    /* Mobile Sizes (Default - Mobile First) */
-    --font-size-h1-mobile: var(--font-size-8);  /* 48px */ 
-    --font-size-h2-mobile: var(--font-size-7);  /* 36px */
-    --font-size-h3-mobile: var(--font-size-6);  /* 30px */
-    --font-size-h4-mobile: var(--font-size-5);  /* 24px */
-    --font-size-h5-mobile: var(--font-size-4);  /* 20px */
-    --font-size-h6-mobile: var(--font-size-3);  /* 18px */
-  
-    /* Desktop Sizes */
-    --font-size-h1-desktop: var(--font-size-10); /* 72px */
-    --font-size-h2-desktop: var(--font-size-9);  /* 60px */
-    --font-size-h3-desktop: var(--font-size-8);  /* 48px */
-    --font-size-h4-desktop: var(--font-size-7);  /* 36px */
-    --font-size-h5-desktop: var(--font-size-6);  /* 30px */
-    --font-size-h6-desktop: var(--font-size-5);  /* 24px */ 
-  
-    /* Active Sizes (start with mobile) */
-    --font-size-h1: var(--font-size-h1-mobile);
-    --font-size-h2: var(--font-size-h2-mobile);
-    --font-size-h3: var(--font-size-h3-mobile);
-    --font-size-h4: var(--font-size-h4-mobile);
-    --font-size-h5: var(--font-size-h5-mobile);
-    --font-size-h6: var(--font-size-h6-mobile);
+  /* Mobile Sizes (Default - Mobile First) */
+  --font-size-h1-mobile: var(--font-size-48); /* 48px */
+  --font-size-h2-mobile: var(--font-size-36); /* 36px */
+  --font-size-h3-mobile: var(--font-size-30); /* 30px */
+  --font-size-h4-mobile: var(--font-size-24); /* 24px */
+  --font-size-h5-mobile: var(--font-size-20); /* 20px */
+  --font-size-h6-mobile: var(--font-size-18); /* 18px */
 
-    /* Body Text Sizes (same on mobile/desktop usually) */
-    --font-size-body: var(--font-size-2);      /* 16px */
-    --font-size-body-xs: var(--font-size-0);  /* 12px */
-    --font-size-body-sm: var(--font-size-1);   /* 14px */
-    --font-size-body-md: var(--font-size-3);   /* 18px */
-    --font-size-body-lg: var(--font-size-4);   /* 20px */
+  /* Desktop Sizes */
+  --font-size-h1-desktop: var(--font-size-72); /* 72px */
+  --font-size-h2-desktop: var(--font-size-60); /* 60px */
+  --font-size-h3-desktop: var(--font-size-48); /* 48px */
+  --font-size-h4-desktop: var(--font-size-36); /* 36px */
+  --font-size-h5-desktop: var(--font-size-30); /* 30px */
+  --font-size-h6-desktop: var(--font-size-24); /* 24px */
 
-    /* Font Weights */
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
+  /* Active Sizes (start with mobile) */
+  --font-size-h1: var(--font-size-h1-mobile);
+  --font-size-h2: var(--font-size-h2-mobile);
+  --font-size-h3: var(--font-size-h3-mobile);
+  --font-size-h4: var(--font-size-h4-mobile);
+  --font-size-h5: var(--font-size-h5-mobile);
+  --font-size-h6: var(--font-size-h6-mobile);
 
-    /* Line Heights */
-    --line-height-tight: 1.2;
-    --line-height-normal: 1.5;
-    --line-height-relaxed: 1.75;
+  /* Body Text Sizes (same on mobile/desktop usually) */
+  --font-size-body: var(--font-size-16); /* 16px */
+  --font-size-body-xs: var(--font-size-12); /* 12px */
+  --font-size-body-sm: var(--font-size-14); /* 14px */
+  --font-size-body-md: var(--font-size-18); /* 18px */
+  --font-size-body-lg: var(--font-size-20); /* 20px */
 
-    /* Brand Colors */
+  /* Font Weights */
+  --font-weight-400: 400;
+  --font-weight-500: 500;
+  --font-weight-600: 600;
+  --font-weight-700: 700;
 
-    /* Primary */
-    --color-primary-900: #4F0000;
-    --color-primary-800: #770000;
-    --color-primary-700: #A20001;
-    --color-primary-600: #CF0001;
-    --color-primary-500: #FE0002;
-    --color-primary-400: #FF4E3E;
-    --color-primary-300: #FF7361;
-    --color-primary-200: #FF9282; 
-    --color-primary-100: #FFAFA1;
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
 
-    /* Neutrals */
-    --color-neutral-900: #0F1011;
-    --color-neutral-800: #38393B;
-    --color-neutral-700: #66686B;
-    --color-neutral-600: #989B9F;
-    --color-neutral-500: #CED2D7;
-    --color-neutral-400: #D8DBDF;
-    --color-neutral-300: #E1E4E7;
-    --color-neutral-200: #EBEDEF;
-    --color-neutral-100: #F5F6F7;
-     
+  /* Brand Colors */
 
-    /* Accents */
-    --color-accent-red-950: #460809;
-    --color-accent-red-900: #82181A;
-    --color-accent-red-800: #9F0712;
-    --color-accent-red-700: #C10007;
-    --color-accent-red-600: #E7000B;
-    --color-accent-red-500: #FB2C36;
-    --color-accent-red-400: #FF6467;
-    --color-accent-red-300: #FFA2A2;
-    --color-accent-red-200: #FFC9C9;
-    --color-accent-red-100: #FFE2E2;
-    --color-accent-red-50: #FEF2F2;
+  /* Primary */
+  --color-primary-950: #470c08;
+  --color-primary-900: #82211a;
+  --color-primary-800: #9d2017;
+  --color-primary-700: #c92519; /* main */
+  --color-primary-600: #e12e21;
+  --color-primary-500: #f44b3f;
+  --color-primary-400: #fc776d;
+  --color-primary-300: #fea9a3;
+  --color-primary-200: #ffcdc9;
+  --color-primary-100: #ffe3e1;
+  --color-primary-50: #fef3f2;
 
-    --color-accent-green-950: #032E15;
-    --color-accent-green-900: #0D542B;
-    --color-accent-green-800: #016630;
-    --color-accent-green-700: #008236;
-    --color-accent-green-600: #00A63E;
-    --color-accent-green-500: #00C950;
-    --color-accent-green-400: #05DF72;
-    --color-accent-green-300: #7BF1A8;
-    --color-accent-green-200: #B9F8CF;
-    --color-accent-green-100: #DCFCE7;
-    --color-accent-green-50: #F0FDF4;
+  /* Secondary */
+  --color-secondary-950: #5f0026;
+  --color-secondary-900: #980347;
+  --color-secondary-800: #b80052;
+  --color-secondary-700: #df0063;
+  --color-secondary-600: #ff007f; /* main */
+  --color-secondary-500: #ff27a5;
+  --color-secondary-400: #ff58c0;
+  --color-secondary-300: #ff98db;
+  --color-secondary-200: #ffc6ec;
+  --color-secondary-100: #ffe3f6;
+  --color-secondary-50: #fff0f9;
 
-    --color-accent-yellow-950: #461901;
-    --color-accent-yellow-900: #7B3306;
-    --color-accent-yellow-800: #973C00;
-    --color-accent-yellow-700: #BB4D00;
-    --color-accent-yellow-600: #E17100;
-    --color-accent-yellow-500: #FE9A00;
-    --color-accent-yellow-400: #FFB900;
-    --color-accent-yellow-300: #FFD230;
-    --color-accent-yellow-200: #FEE685;
-    --color-accent-yellow-100: #FEF3C6;
-    --color-accent-yellow-50: #FFFBEB;
+  /* Neutrals */
+  --color-neutral-950: #030712;
+  --color-neutral-900: #101828;
+  --color-neutral-800: #1e2939;
+  --color-neutral-700: #364153;
+  --color-neutral-600: #4a5565;
+  --color-neutral-500: #6a7282;
+  --color-neutral-400: #99a1af;
+  --color-neutral-300: #d1d5dc;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-50: #f9fafb;
 
-    --color-accent-pink-950: #4E0055;
-    --color-accent-pink-900: #75117E;
-    --color-accent-pink-800: #8C0E9A;
-    --color-accent-pink-700: #A90EBD;
-    --color-accent-pink-600: #CE1FEA;
-    --color-accent-pink-500: #DF36FF;
-    --color-accent-pink-400: #ED6DFF;
-    --color-accent-pink-300: #F2A3FF;
-    --color-accent-pink-200: #F7CCFF;
-    --color-accent-pink-100: #FAE6FF;
-    --color-accent-pink-50: #FEF3FF;
+  /* Accents */
+  /* Blue */
+  --color-accent-blue-950: #052f4a;
+  --color-accent-blue-900: #024a70;
+  --color-accent-blue-800: #00598a;
+  --color-accent-blue-700: #0069a8;
+  --color-accent-blue-600: #0084d1;
+  --color-accent-blue-500: #00a6f4;
+  --color-accent-blue-400: #00bcff;
+  --color-accent-blue-300: #74d4ff;
+  --color-accent-blue-200: #b8e6fe;
+  --color-accent-blue-100: #dff2fe;
+  --color-accent-blue-50: #f0f9ff;
 
-     /* ==================== */
-    /* SEMANTIC ALIASES     */
-    /* (Use these in code)  */
-    /* ==================== */
-    
-    /* States */
-    --color-error: var(--color-accent-red-500);
-    --color-sucess: var(var(--color-accent-green-400));
+  /* Green */
+  --color-accent-green-950: #032e15;
+  --color-accent-green-900: #0d542b;
+  --color-accent-green-800: #016630;
+  --color-accent-green-700: #008236;
+  --color-accent-green-600: #00a63e;
+  --color-accent-green-500: #00c950;
+  --color-accent-green-400: #05df72;
+  --color-accent-green-300: #7bf1a8;
+  --color-accent-green-200: #b9f8cf;
+  --color-accent-green-100: #dcfce7;
+  --color-accent-green-50: #f0fdf4;
 
+  /* Red */
+  --color-accent-red-950: #460809;
+  --color-accent-red-900: #82181a;
+  --color-accent-red-800: #9f0712;
+  --color-accent-red-700: #c10007;
+  --color-accent-red-600: #e7000b;
+  --color-accent-red-500: #fb2c36;
+  --color-accent-red-400: #ff6467;
+  --color-accent-red-300: #ffa2a2;
+  --color-accent-red-200: #ffc9c9;
+  --color-accent-red-100: #ffe2e2;
+  --color-accent-red-50: #fef2f2;
 
-    /* SHADOWS */
-    /* 
+  /* Yellow */
+  --color-accent-yellow-950: #461901;
+  --color-accent-yellow-900: #7b3306;
+  --color-accent-yellow-800: #973c00;
+  --color-accent-yellow-700: #bb4d00;
+  --color-accent-yellow-600: #e17100;
+  --color-accent-yellow-500: #fe9a00;
+  --color-accent-yellow-400: #ffb900;
+  --color-accent-yellow-300: #ffd230;
+  --color-accent-yellow-200: #fee685;
+  --color-accent-yellow-100: #fef3c6;
+  --color-accent-yellow-50: #fffbeb;
+
+  /* ==================== */
+  /* SEMANTIC ALIASES     */
+  /* (Use these in code)  */
+  /* ==================== */
+
+  /* States */
+  --color-error: var(--color-accent-red-500);
+  --color-sucess: var(--color-accent-green-400);
+  --color-caution: var(--color-accent-yellow-500);
+  --color-information: var(--color-accent-blue-500);
+
+  /* SHADOWS */
+  /* 
     SHADOW SCALE REFERENCE:
     --shadow-xs:  Subtle, barely visible (hover states, input focus)
     --shadow-sm:  Light elevation (buttons, small cards)
@@ -170,58 +191,54 @@
     --shadow-xl:  Highest elevation (modals, dialogs)
   */
 
-    /* Base Shadows */
-    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.2);
-    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.3);
-    --shadow-xl: 0 15px 35px rgba(0, 0, 0, 0.3);
+  /* Base Shadows */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 15px 35px rgba(0, 0, 0, 0.3);
 
-    /* Border Radius */
-    --radius-sm: 6px;
-    --radius-md: 12px;
-    --radius-lg: 24px;
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
 
-    /* Transitions */
-    --duration-fast: 150ms;
-    --duration-normal: 300ms;
-    --duration-slow: 500ms;
-    
-    
-    /* ==================== */
-    /* GRID SYSTEM          */
-    /* ==================== */
-    
-    /* Grid Configuration */
-    --grid-cols: 8;
-    --grid-margin: var(--spacing-4);   /* 24px - references spacing */
-    --grid-gutter: var(--spacing-3);   /* 16px - references spacing */
-    
-    /* Semantic Aliases */
-    --layout-padding-x: var(--grid-margin);
-    --gap-default: var(--grid-gutter);
-    
-    /* Container */
-    --container-max: 100%;
+  /* Transitions */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
 
-    @media (min-width: 768px) {
-        :root {
-          --grid-cols: 12;
-          --grid-margin: var(--spacing-5);   /* 32px */
-          --grid-gutter: var(--spacing-4);   /* 24px */
-          --container-max: 1024px;
-        }
+  /* ==================== */
+  /* GRID SYSTEM          */
+  /* ==================== */
+
+  /* Grid Configuration */
+  --grid-cols: 8;
+  --grid-margin: var(--spacing-4); /* 24px - references spacing */
+  --grid-gutter: var(--spacing-3); /* 16px - references spacing */
+
+  /* Semantic Aliases */
+  --layout-padding-x: var(--grid-margin);
+  --gap-default: var(--grid-gutter);
+
+  /* Container */
+  --container-max: 100%;
+
+  @media (min-width: 768px) {
+    :root {
+      --grid-cols: 12;
+      --grid-margin: var(--spacing-5); /* 32px */
+      --grid-gutter: var(--spacing-4); /* 24px */
+      --container-max: 1024px;
     }
-      
-    @media (min-width: 1024px) {
-        :root {
-          --grid-cols: 12;
-          --grid-margin: var(--spacing-6);   /* 48px */
-          --grid-gutter: var(--spacing-5);   /* 32px */
-          --container-max: 1280px;
-        }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --grid-cols: 12;
+      --grid-margin: var(--spacing-6); /* 48px */
+      --grid-gutter: var(--spacing-5); /* 32px */
+      --container-max: 1280px;
     }
-
-
-
+  }
 }
