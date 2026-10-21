@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -35,7 +36,87 @@ function freshState() {
   };
 }
 
-let state = freshState();
+// ─── Persistence (survive restarts) ──────────────────────────────────────────
+//
+// The whole queue state is saved to a JSON file after every change, and loaded
+// again when the server starts. That way a power cut, Windows update, or service
+// restart in the middle of the day doesn't reset the queue to #1.
+
+// Where the file lives. Defaults to backend/state.json (next to this file, so it
+// works no matter which folder the Windows service starts from).
+// Can be overridden with the QMS_STATE_FILE environment variable.
+const STATE_FILE = process.env.QMS_STATE_FILE || path.join(__dirname, 'state.json');
+const STATE_TMP_FILE = STATE_FILE + '.tmp';
+
+// Today's date as YYYY-MM-DD in the server's LOCAL time zone.
+// ('en-CA' is just a trick: that locale formats dates as YYYY-MM-DD.)
+function todayKey() {
+  return new Date().toLocaleDateString('en-CA');
+}
+
+// Save the current state to disk.
+// We write to a temporary file first, then rename it over the real file.
+// A rename is (nearly) instant, so if power dies mid-write we still have the
+// previous complete state.json instead of a half-written, corrupted one.
+function saveState() {
+  try {
+    // savedDate = the day of the LAST change. On startup we only restore the
+    // file if it was last changed today, so yesterday's queue never comes back.
+    const payload = { savedDate: todayKey(), state };
+    fs.writeFileSync(STATE_TMP_FILE, JSON.stringify(payload));
+    fs.renameSync(STATE_TMP_FILE, STATE_FILE);
+  } catch (err) {
+    // Never crash the queue just because saving failed (e.g. antivirus briefly
+    // locking the file). Log it and carry on; the next change will try again.
+    console.error('Could not save queue state:', err.message);
+  }
+}
+
+// Load the saved state, or fall back to a fresh queue.
+function loadState() {
+  try {
+    if (!fs.existsSync(STATE_FILE)) {
+      console.log('No saved state found. Starting a fresh queue.');
+      return freshState();
+    }
+
+    const payload = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+
+    // Saved on a previous day -> new day, new queue.
+    if (!payload || payload.savedDate !== todayKey()) {
+      console.log('Saved state is from a previous day. Starting a fresh queue.');
+      return freshState();
+    }
+
+    // Basic shape check, so a damaged file can't break the server later.
+    const s = payload.state;
+    const looksValid =
+      s &&
+      s.lanes && s.lanes.regular && s.lanes.priority &&
+      Array.isArray(s.lanes.regular.returned) &&
+      Array.isArray(s.lanes.priority.returned) &&
+      Array.isArray(s.counters) &&
+      Array.isArray(s.completedNumbers) &&
+      Array.isArray(s.log) &&
+      s.activeNumbers && typeof s.activeNumbers === 'object';
+    if (!looksValid) {
+      console.error('Saved state is damaged. Starting a fresh queue.');
+      return freshState();
+    }
+
+    // Start from a fresh state and overlay the saved one, so any field added to
+    // freshState() in a future version still gets a default value.
+    console.log('Restored queue state from', STATE_FILE);
+    return { ...freshState(), ...s };
+  } catch (err) {
+    // Unreadable or invalid JSON -> don't crash on boot, just start fresh.
+    console.error('Could not load queue state:', err.message);
+    return freshState();
+  }
+}
+
+// Load whatever was saved (or start fresh).
+let state = loadState();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -73,6 +154,10 @@ function returnToLane(lane, seq) {
 }
 
 function broadcastState() {
+  // Every handler that changes the queue (start, call, done, reset, rename,
+  // toggle) already ends by calling this function. Saving here means one place
+  // covers them all, and a future handler can't forget to persist its change.
+  saveState();
   io.emit('state', publicState());
 }
 
@@ -235,7 +320,7 @@ app.get('*', (req, res) => {
 
 // ─── Start ───────────────────────────────────────────────────────────────────
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`QMS running on http://0.0.0.0:${PORT}`);
   console.log(`Access from other devices: http://<your-ip>:${PORT}`);
