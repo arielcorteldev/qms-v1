@@ -1,0 +1,1 @@
+{"savedDate":"2026-10-21","state":{"lanes":{"regular":{"next":1,"returned":[]},"priority":{"next":1,"returned":[]}},"activeNumbers":{},"completedNumbers":[],"servedCounts":{"regular":0,"priority":0},"counters":[{"id":1,"name":"Counter 1","enabled":true},{"id":2,"name":"Counter 2","enabled":true},{"id":3,"name":"Counter 3","enabled":true}],"log":[],"started":false}}

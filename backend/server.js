@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
@@ -191,23 +192,102 @@ function logEntry({ ticket, lane, counterId, status }) {
 
 // ─── Socket Events ───────────────────────────────────────────────────────────
 
+// ─── Admin PIN ───────────────────────────────────────────────────────────────
+//
+// Admin actions (start, reset, rename counter, enable/disable counter) require
+// a PIN. The check happens HERE on the server, because anyone on the LAN can
+// send these socket events without ever opening admin.html. Hiding a button in
+// the page would not protect anything.
+
+// The PIN comes from an environment variable so it never lives in the code.
+// With NSSM:  nssm set QMS AppEnvironmentExtra PORT=3000 ADMIN_PIN=yourpin
+const ADMIN_PIN = process.env.ADMIN_PIN || '';
+if (!ADMIN_PIN) {
+  console.warn('WARNING: ADMIN_PIN is not set. All admin actions will be refused until it is.');
+}
+
+// Brute-force protection: after MAX_FAILS wrong PINs from one IP address,
+// that IP is locked out for LOCK_MS. (A 4-digit PIN has only 10,000 options,
+// so without this a script on the LAN could guess it in seconds.)
+const MAX_FAILS = 5;
+const LOCK_MS = 60 * 1000;
+const pinFailures = new Map(); // ip -> { count, lockedUntil }
+
+// Compare PINs without leaking information through timing.
+// Hashing both sides first gives equal-length buffers, which timingSafeEqual requires.
+function pinMatches(candidate) {
+  const a = crypto.createHash('sha256').update(String(candidate ?? '')).digest();
+  const b = crypto.createHash('sha256').update(ADMIN_PIN).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+
+// Returns true if this request may proceed. Otherwise it sends the reason back
+// through `reply` (the acknowledgement callback) and returns false.
+function requireAdmin(socket, pin, reply) {
+  if (!ADMIN_PIN) {
+    reply({ ok: false, code: 'not-configured', error: 'Admin PIN is not configured on the server.' });
+    return false;
+  }
+
+  const ip = socket.handshake.address;
+  const now = Date.now();
+  const record = pinFailures.get(ip) || { count: 0, lockedUntil: 0 };
+
+  if (record.lockedUntil > now) {
+    const secs = Math.ceil((record.lockedUntil - now) / 1000);
+    reply({ ok: false, code: 'locked', error: `Too many wrong PINs. Try again in ${secs}s.` });
+    return false;
+  }
+
+  if (!pinMatches(pin)) {
+    record.count += 1;
+    if (record.count >= MAX_FAILS) {
+      record.lockedUntil = now + LOCK_MS;
+      record.count = 0;
+    }
+    pinFailures.set(ip, record);
+    reply({ ok: false, code: 'bad-pin', error: 'Wrong PIN.' });
+    return false;
+  }
+
+  pinFailures.delete(ip); // correct PIN -> clear this IP's failure history
+  return true;
+}
+
+// Wraps an admin handler so the PIN is checked before it runs.
+// The client sends: socket.emit(event, { ...data, pin }, ackCallback)
+// and gets back { ok: true } or { ok: false, code, error }.
+function adminOnly(socket, handler) {
+  return (payload, ack) => {
+    // Tolerate old clients that send no payload and/or no callback.
+    if (typeof payload === 'function') { ack = payload; payload = {}; }
+    payload = payload || {};
+    const reply = typeof ack === 'function' ? ack : () => {};
+
+    if (!requireAdmin(socket, payload.pin, reply)) return;
+
+    handler(payload);
+    reply({ ok: true });
+  };
+}
+
 io.on('connection', (socket) => {
   // Send current state on connect
   socket.emit('state', publicState());
 
-  // Start queue
-  socket.on('queue:start', () => {
+  // Start queue (admin only)
+  socket.on('queue:start', adminOnly(socket, () => {
     if (!state.started) {
       state.started = true;
       broadcastState();
     }
-  });
+  }));
 
-  // Reset queue
-  socket.on('queue:reset', () => {
+  // Reset queue (admin only)
+  socket.on('queue:reset', adminOnly(socket, () => {
     state = freshState();
     broadcastState();
-  });
+  }));
 
   function emitCalled({ lane, seq, counter }) {
     io.emit('number:called', {
@@ -289,24 +369,24 @@ io.on('connection', (socket) => {
     broadcastState();
   });
 
-  // Rename a counter
-  socket.on('admin:renameCounter', ({ counterId, name }) => {
+  // Rename a counter (admin only)
+  socket.on('admin:renameCounter', adminOnly(socket, ({ counterId, name }) => {
     const cid = parseInt(counterId, 10);
     const counter = getCounter(cid);
     if (!counter) return;
     if (!name || !name.trim()) return;
     counter.name = name.trim().slice(0, 30);
     broadcastState();
-  });
+  }));
 
-  // Enable / disable a counter
-  socket.on('admin:toggleCounter', ({ counterId }) => {
+  // Enable / disable a counter (admin only)
+  socket.on('admin:toggleCounter', adminOnly(socket, ({ counterId }) => {
     const cid = parseInt(counterId, 10);
     const counter = getCounter(cid);
     if (!counter) return;
     counter.enabled = !counter.enabled;
     broadcastState();
-  });
+  }));
 });
 
 // ─── Static Frontend ─────────────────────────────────────────────────────────

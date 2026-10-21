@@ -107,6 +107,23 @@
   </div>
   </div>
 
+  <!-- PIN Modal: shown the first time an admin action is attempted -->
+  <div class="modal-backdrop" id="pin-modal" style="display:none">
+    <div class="modal">
+      <h2>Admin PIN</h2>
+      <p>Enter the admin PIN to continue.</p>
+      <!-- type="password" masks the digits; inputmode="numeric" opens the number pad on touch screens -->
+      <input id="pin-input" type="password" inputmode="numeric" autocomplete="off" maxlength="20"
+             style="width:100%;padding:0.6rem;margin:0.25rem 0;box-sizing:border-box" />
+      <!-- Error text color is hardcoded here; swap in a color token from tokens.css if you prefer -->
+      <div id="pin-error" style="color:#c0392b;min-height:1.4em;margin-bottom:0.5rem"></div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="pin-cancel">Cancel</button>
+        <button class="btn btn-start" id="pin-submit">Unlock</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
@@ -184,7 +201,7 @@
       // Name inputs
       $counters.querySelectorAll('.counter-name-input').forEach(input => {
         input.addEventListener('change', () => {
-          socket.emit('admin:renameCounter', {
+          adminEmit('admin:renameCounter', {
             counterId: parseInt(input.dataset.id),
             name: input.value,
           });
@@ -194,7 +211,7 @@
       // Toggle buttons
       $counters.querySelectorAll('.toggle-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          socket.emit('admin:toggleCounter', { counterId: parseInt(btn.dataset.id) });
+          adminEmit('admin:toggleCounter', { counterId: parseInt(btn.dataset.id) });
         });
       });
 
@@ -224,8 +241,86 @@
       }).join('');
     }
 
+    // ── Admin PIN ─────────────────────────────────────────────────────────────
+    // Every admin action goes through adminEmit(). It attaches the PIN and waits
+    // for the server's answer. The server is the one that checks the PIN; this
+    // page only collects it.
+    const $pinModal  = document.getElementById('pin-modal');
+    const $pinInput  = document.getElementById('pin-input');
+    const $pinError  = document.getElementById('pin-error');
+
+    // sessionStorage keeps the PIN only for this browser tab: it survives a page
+    // refresh but is forgotten when the tab or browser is closed.
+    let adminPin = sessionStorage.getItem('qmsAdminPin') || '';
+
+    // The action that triggered the PIN prompt. It is replayed once a PIN is entered.
+    let pendingAction = null;
+
+    function showPinModal(message = '') {
+      $pinError.textContent = message;
+      $pinInput.value = '';
+      $pinModal.style.display = 'flex';
+      $pinInput.focus();
+    }
+
+    function hidePinModal() {
+      $pinModal.style.display = 'none';
+    }
+
+    function adminEmit(event, payload = {}) {
+      // No PIN yet: ask for it first, then replay this action.
+      if (!adminPin) {
+        pendingAction = { event, payload };
+        showPinModal();
+        return;
+      }
+
+      // Send the action with the PIN. The last argument is the server's reply.
+      socket.emit(event, { ...payload, pin: adminPin }, (res) => {
+        if (res && res.ok) return; // accepted, state updates arrive via 'state'
+
+        if (res && (res.code === 'bad-pin' || res.code === 'locked')) {
+          // Forget the bad PIN and ask again, keeping the action to retry.
+          adminPin = '';
+          sessionStorage.removeItem('qmsAdminPin');
+          pendingAction = { event, payload };
+          showPinModal(res.error);
+        } else {
+          alert((res && res.error) || 'The server did not accept that action.');
+        }
+      });
+    }
+
+    function submitPin() {
+      const pin = $pinInput.value.trim();
+      if (!pin) return;
+      adminPin = pin;
+      sessionStorage.setItem('qmsAdminPin', pin);
+      hidePinModal();
+
+      // Replay the action that was waiting for the PIN.
+      if (pendingAction) {
+        const { event, payload } = pendingAction;
+        pendingAction = null;
+        adminEmit(event, payload);
+      }
+    }
+
+    function cancelPin() {
+      pendingAction = null;
+      hidePinModal();
+      render(); // put any unsaved typed value (e.g. a counter name) back to the server's value
+    }
+
+    document.getElementById('pin-submit').addEventListener('click', submitPin);
+    document.getElementById('pin-cancel').addEventListener('click', cancelPin);
+    $pinInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitPin();
+      if (e.key === 'Escape') cancelPin();
+    });
+
     // ── Controls ──────────────────────────────────────────────────────────────
-    $btnStart.addEventListener('click', () => socket.emit('queue:start'));
+    $btnStart.addEventListener('click', () => adminEmit('queue:start'));
 
     $btnReset.addEventListener('click', () => $modal.style.display = 'flex');
 
@@ -234,7 +329,7 @@
     });
 
     document.getElementById('modal-confirm').addEventListener('click', () => {
-      socket.emit('queue:reset');
+      adminEmit('queue:reset');
       $modal.style.display = 'none';
     });
 
