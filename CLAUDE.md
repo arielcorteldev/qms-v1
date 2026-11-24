@@ -61,4 +61,4 @@ Styling: every page links `css/tokens.css` (design tokens/variables) then `css/s
 - LAN-only. The display may run without internet, so no CDN links, web fonts, or external calls. All assets stay local.
 - All queue logic stays in server.js. Frontend pages only render the state they receive.
 - Don't change the NSSM service setup or production config; tell me what needs changing and I'll do it.
-- New socket events and state fields must follow the existing patterns (broadcastState, freshState defaults, adminOnly for admin actions).
+- New socket events and state fields must follow the existing patterns (broadcastState, freshState defaults, adminOnly for admin actions). Non-admin handlers must read their payload as `const { ... } = payload || {}`, never destructure in the parameter list: a forged event with no payload would throw and crash the server.

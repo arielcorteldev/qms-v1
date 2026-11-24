@@ -330,7 +330,14 @@ io.on('connection', (socket) => {
   }
 
   // Call next REGULAR number for a counter
-  socket.on('counter:callNext', ({ counterId }) => {
+  // Why `payload || {}` instead of destructuring in the parameter list:
+  // any LAN client can emit these events with no data (or null). Destructuring
+  // undefined throws a TypeError before our checks run, nothing catches it, and
+  // the whole server process exits. With the fallback, a missing payload just
+  // gives counterId = undefined, which the checks below reject ("Invalid counter.").
+  // Same guard adminOnly() uses for admin events.
+  socket.on('counter:callNext', (payload) => {
+    const { counterId } = payload || {};
     const cid = parseInt(counterId, 10);
     const counter = getCounter(cid);
 
@@ -362,7 +369,8 @@ io.on('connection', (socket) => {
   });
 
   // Call next PRIORITY number for a counter
-  socket.on('counter:callPriority', ({ counterId }) => {
+  socket.on('counter:callPriority', (payload) => {
+    const { counterId } = payload || {}; // see callNext: never crash on a missing payload
     const cid = parseInt(counterId, 10);
     const counter = getCounter(cid);
 
@@ -384,7 +392,8 @@ io.on('connection', (socket) => {
   // Mark current number as done — the END of a client's visit, so it counts as served.
   //   Counter 1/2: "Done (No Release)" — nothing to hand over.
   //   Releasing Window: "Mark as Released" — document handed over.
-  socket.on('counter:markDone', ({ counterId }) => {
+  socket.on('counter:markDone', (payload) => {
+    const { counterId } = payload || {}; // see callNext: never crash on a missing payload
     const cid = parseInt(counterId, 10);
     const current = state.activeNumbers[cid];
 
@@ -413,7 +422,8 @@ io.on('connection', (socket) => {
 
   // Counter 1/2 finished processing; client now waits for their document.
   // NOT counted as served yet — that happens when it's released.
-  socket.on('counter:sendToRelease', ({ counterId }) => {
+  socket.on('counter:sendToRelease', (payload) => {
+    const { counterId } = payload || {}; // see callNext: never crash on a missing payload
     const cid = parseInt(counterId, 10);
     const current = state.activeNumbers[cid];
 
@@ -437,7 +447,8 @@ io.on('connection', (socket) => {
 
   // Releasing Window calls a specific waiting ticket (picked from the list,
   // because documents can be ready out of order).
-  socket.on('release:call', ({ counterId, display }) => {
+  socket.on('release:call', (payload) => {
+    const { counterId, display } = payload || {}; // see callNext: never crash on a missing payload
     const cid = parseInt(counterId, 10);
     const counter = getCounter(cid);
 
@@ -468,7 +479,8 @@ io.on('connection', (socket) => {
   });
 
   // Client didn't come up — announce the same ticket again.
-  socket.on('release:recall', ({ counterId }) => {
+  socket.on('release:recall', (payload) => {
+    const { counterId } = payload || {}; // see callNext: never crash on a missing payload
     const cid = parseInt(counterId, 10);
     const counter = getCounter(cid);
     const current = state.activeNumbers[cid];
@@ -483,7 +495,8 @@ io.on('connection', (socket) => {
   });
 
   // Client still not here — put the ticket back in the waiting list to call later.
-  socket.on('release:return', ({ counterId }) => {
+  socket.on('release:return', (payload) => {
+    const { counterId } = payload || {}; // see callNext: never crash on a missing payload
     const cid = parseInt(counterId, 10);
     const current = state.activeNumbers[cid];
 
