@@ -21,6 +21,12 @@
       <!-- Rendered by JS -->
     </div>
 
+    <!-- Tickets waiting at the Releasing Window, so clients know they're in line. -->
+    <section class="release-strip">
+      <div class="release-strip-label">For Release</div>
+      <div class="release-strip-list" id="release-list"></div>
+    </section>
+
     <footer class="screen-footer">
       <div class="footer-stat">Total Served: <span id="total-served">0</span></div>
       <div class="footer-stat">Now Serving: <span id="active-count">0</span></div>
@@ -43,12 +49,12 @@
 
     socket.on('number:called', (payload) => {
       if (!payload || typeof payload !== 'object') return;
-      const { ticket, lane, counterName, timestamp } = payload;
+      const { ticket, lane, kind, counterName, timestamp } = payload;
       if (typeof ticket !== 'string') return;
       if (typeof counterName !== 'string') return;
       if (typeof timestamp !== 'number') return;
 
-      audioQueue.push({ ticket, lane, counterName, timestamp });
+      audioQueue.push({ ticket, lane, kind, counterName, timestamp });
       processAudioQueue();
     });
 
@@ -74,16 +80,21 @@
       }
     }
 
-    function speakCalledNumber({ ticket, lane, counterName }, attempt) {
+    function speakCalledNumber({ ticket, lane, kind, counterName }, attempt) {
       return new Promise((resolve, reject) => {
         if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
           return reject(new Error('speech not supported'));
         }
 
         const isPriority = lane === 'priority' || (typeof ticket === 'string' && ticket.startsWith('P'));
-        const text = isPriority
-          ? `Priority ${ticket.replace(/^P/, '')}, you may now proceed at ${counterName}`
-          : `Number ${ticket}, you may now proceed at ${counterName}`;
+        // "Priority 3" / "Number 12" — same prefix for both kinds of call.
+        const who = isPriority ? `Priority ${ticket.replace(/^P/, '')}` : `Number ${ticket}`;
+        // kind === 'release' means the Releasing Window called the client back.
+        // Wording is fixed (not the counter's name) so it stays clear even if
+        // admin renames the counter.
+        const text = kind === 'release'
+          ? `${who}, your document is ready. Please proceed to the Releasing Window.`
+          : `${who}, you may now proceed at ${counterName}`;
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US';
 
@@ -143,6 +154,20 @@
       render(oldActive);
     });
 
+    // Status line under each counter's number.
+    // The Releasing Window says "Now Releasing" instead of "Now Serving".
+    function statusText(counterId, hasNum, lane) {
+      if (!hasNum) return state.started ? 'Waiting…' : 'Idle';
+      const verb = counterId === state.releasingCounterId ? 'Now Releasing' : 'Now Serving';
+      return lane === 'priority' ? `${verb} · Priority` : verb;
+    }
+
+    // Fixed label shown above each counter's editable name.
+    // The Releasing Window is labelled by its role, not its number.
+    function counterLabel(id) {
+      return id === state.releasingCounterId ? 'Releasing Window' : `Counter ${id}`;
+    }
+
     function render(oldActive = {}) {
       const area = document.getElementById('counters-area');
       const counters = state.counters || [];
@@ -162,14 +187,14 @@
         panel.id = `panel-${c.id}`;
 
         panel.innerHTML = `
-          <div class="counter-panel-label">Counter ${c.id}</div>
+          <div class="counter-panel-label">${counterLabel(c.id)}</div>
           <div class="counter-panel-name">${c.name}</div>
           <div class="counter-number ${hasNum ? '' : 'idle'}" id="num-${c.id}">
             ${hasNum ? display : '·'}
           </div>
-          ${hasNum && lane === 'priority' ? `<div class="priority-line">${display} — Counter ${c.id} — Priority</div>` : ''}
+          ${hasNum && lane === 'priority' ? `<div class="priority-line">${display} — ${counterLabel(c.id)} — Priority</div>` : ''}
           <div class="counter-status ${hasNum ? 'serving' : ''}">
-            ${hasNum ? (lane === 'priority' ? 'Now Serving · Priority' : 'Now Serving') : (state.started ? 'Waiting…' : 'Idle')}
+            ${statusText(c.id, hasNum, lane)}
           </div>
         `;
 
@@ -182,6 +207,15 @@
           numEl.classList.add('flash');
         }
       });
+
+      // For Release strip — waiting tickets in arrival order.
+      const releaseList = document.getElementById('release-list');
+      const forRelease = state.forRelease || [];
+      releaseList.innerHTML = forRelease.length
+        ? forRelease
+            .map(t => `<span class="release-chip${t.lane === 'priority' ? ' is-priority' : ''}">${t.display}</span>`)
+            .join('')
+        : '<span class="release-empty">None</span>';
 
       // Footer
       document.getElementById('total-served').textContent = state.completedNumbers?.length ?? 0;

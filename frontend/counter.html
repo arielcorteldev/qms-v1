@@ -31,25 +31,54 @@
       <div class="number-value idle" id="active-number">—</div>
     </div>
 
+    <!--
+      Two modes share this page:
+        Serving (Counter 1/2): Call Next · Call Priority · Send to Releasing · Done (No Release)
+        Releasing Window (?c=3): Recall · Return to List · Mark as Released
+      Wrappers marked data-mode="serving" / "releasing" are shown or hidden in render().
+    -->
     <div class="actions">
-      <div style="text-align:center">
+      <div style="text-align:center" data-mode="serving">
         <button class="btn btn-call" id="btn-call" disabled>Call Next</button>
         <div class="key-hint" style="margin-top:0.5rem">
           <span class="key">Enter</span><span style="font-size:0.6rem;color:var(--color-neutral-800)">/</span><span class="key">Space</span>
         </div>
       </div>
-      <div style="text-align:center">
+      <div style="text-align:center" data-mode="serving">
         <button class="btn btn-call btn-priority" id="btn-priority" disabled>Call Priority</button>
         <div class="key-hint" style="margin-top:0.5rem">
           <span class="key">P</span>
         </div>
       </div>
+      <div style="text-align:center" data-mode="serving">
+        <button class="btn btn-outline" id="btn-send-release" disabled>Send to Releasing</button>
+        <div class="key-hint" style="margin-top:0.5rem">
+          <span class="key">S</span>
+        </div>
+      </div>
+      <div style="text-align:center" data-mode="releasing">
+        <button class="btn btn-call" id="btn-recall" disabled>Recall</button>
+        <div class="key-hint" style="margin-top:0.5rem">
+          <span class="key">R</span>
+        </div>
+      </div>
+      <div style="text-align:center" data-mode="releasing">
+        <!-- No keyboard shortcut on purpose: a stray keypress shouldn't bounce a client back. -->
+        <button class="btn btn-outline" id="btn-return" disabled>Return to List</button>
+      </div>
+      <!-- Shared by both modes; only the label changes. -->
       <div style="text-align:center">
-        <button class="btn btn-done" id="btn-done" disabled>Mark as Done</button>
+        <button class="btn btn-done" id="btn-done" disabled>Done (No Release)</button>
         <div class="key-hint" style="margin-top:0.5rem">
           <span class="key">D</span>
         </div>
       </div>
+    </div>
+
+    <!-- Releasing Window only: tickets waiting for their document, click to call. -->
+    <div class="release-section" id="release-section" data-mode="releasing">
+      <div class="others-label">Waiting for Release</div>
+      <div class="release-grid" id="release-grid"></div>
     </div>
 
     <div class="others-section">
@@ -76,11 +105,13 @@
     const MY_ID = parseInt(params.get('c') || '1', 10);
 
     if (![1,2,3].includes(MY_ID)) {
-      document.body.innerHTML = '<p style="padding:2rem;font-family:monospace;color:#ff4d4d">Invalid counter ID. Use ?c=1, ?c=2, or ?c=3</p>';
+      document.body.innerHTML = '<p style="padding:2rem;font-family:monospace;color:#ff4d4d">Invalid counter ID. Use ?c=1 or ?c=2 for the counters, or ?c=3 for the Releasing Window.</p>';
       throw new Error('invalid counter');
     }
 
-    document.title = `Counter ${MY_ID} — QMS`;
+    // Neutral placeholder; render() sets the real title once state arrives
+    // (we don't know yet whether this is the Releasing Window).
+    document.title = 'QMS';
 
     const socket = io();
     let state = {};
@@ -96,6 +127,11 @@
     const $btnCall     = document.getElementById('btn-call');
     const $btnPriority = document.getElementById('btn-priority');
     const $btnDone     = document.getElementById('btn-done');
+    const $btnSendRel  = document.getElementById('btn-send-release');
+    const $btnRecall   = document.getElementById('btn-recall');
+    const $btnReturn   = document.getElementById('btn-return');
+    const $releaseGrid = document.getElementById('release-grid');
+    const $modeBlocks  = document.querySelectorAll('[data-mode]');
     const $othersGrid  = document.getElementById('others-grid');
     const $toast       = document.getElementById('toast');
     const $totalServed = document.getElementById('total-served');
@@ -129,12 +165,23 @@
       const myLane = myActive?.lane || (typeof myActive === 'string' && myActive.startsWith('P') ? 'priority' : 'regular');
       const myDisplay = myActive?.display ?? myActive;
       const enabled = counter?.enabled ?? true;
+      // The server tells us which counter is the Releasing Window.
+      const isReleasing = MY_ID === state.releasingCounterId;
+      const forRelease = state.forRelease || [];
+
+      // Show only the controls for this counter's mode.
+      const mode = isReleasing ? 'releasing' : 'serving';
+      $modeBlocks.forEach(el => { el.hidden = el.dataset.mode !== mode; });
 
       // Overlay
       $notStarted.style.display = state.started ? 'none' : '';
 
-      // Header
-      $counterIdLbl.textContent = `Counter ${MY_ID}`;
+      // Header + tab title: the Releasing Window is labelled by its role, not
+      // its number. Set here (not at init) because releasingCounterId only
+      // arrives with the first state payload.
+      const label = isReleasing ? 'Releasing Window' : `Counter ${MY_ID}`;
+      $counterIdLbl.textContent = label;
+      document.title = `${label} — QMS`;
       $counterName.textContent = counter?.name || `Counter ${MY_ID}`;
 
       // Active number
@@ -157,18 +204,47 @@
       }
 
       // Buttons
+      // These are convenience only: the server re-checks every rule, because
+      // any LAN client could emit events directly.
       // Regular call is allowed if no active OR active is priority (auto-cancel + return priority).
-      const canCall = state.started && enabled && (!hasActive || myLane === 'priority');
-      const canPriority = state.started && enabled && !hasActive;
-      const canDone = hasActive;
+      const canCall = !isReleasing && state.started && enabled && (!hasActive || myLane === 'priority');
+      const canPriority = !isReleasing && state.started && enabled && !hasActive;
       $btnCall.disabled = !canCall;
       $btnPriority.disabled = !canPriority;
-      $btnDone.disabled = !canDone;
+      $btnSendRel.disabled = isReleasing || !hasActive;
+      $btnRecall.disabled = !isReleasing || !hasActive;
+      $btnReturn.disabled = !isReleasing || !hasActive;
+      $btnDone.disabled = !hasActive;
+      $btnDone.textContent = isReleasing ? 'Mark as Released' : 'Done (No Release)';
 
       // Queue info
-      $queueInfo.textContent = state.started
-        ? `Next Regular: #${state.nextNumber} · Next Priority: P${state.nextPriority ?? 1}`
-        : 'Idle';
+      if (!state.started) {
+        $queueInfo.textContent = 'Idle';
+      } else if (isReleasing) {
+        $queueInfo.textContent = `Waiting for release: ${forRelease.length}`;
+      } else {
+        $queueInfo.textContent = `Next Regular: #${state.nextNumber} · Next Priority: P${state.nextPriority ?? 1}`;
+      }
+
+      // Waiting-for-release list (Releasing Window only).
+      // Each ticket is a button; clicking it calls that client. Disabled while
+      // a ticket is already active, since the window serves one client at a time.
+      if (isReleasing) {
+        $releaseGrid.innerHTML = '';
+        if (!forRelease.length) {
+          $releaseGrid.innerHTML = '<div class="release-empty">No one waiting.</div>';
+        }
+        forRelease.forEach(t => {
+          const btn = document.createElement('button');
+          btn.className = 'release-ticket' + (t.lane === 'priority' ? ' is-priority' : '');
+          btn.textContent = t.display;
+          btn.disabled = !state.started || !enabled || hasActive;
+          btn.addEventListener('click', () => {
+            socket.emit('release:call', { counterId: MY_ID, display: t.display });
+          });
+          $releaseGrid.appendChild(btn);
+        });
+      }
 
       // Others grid
       $othersGrid.innerHTML = '';
@@ -208,6 +284,18 @@
       socket.emit('counter:markDone', { counterId: MY_ID });
     });
 
+    $btnSendRel.addEventListener('click', () => {
+      socket.emit('counter:sendToRelease', { counterId: MY_ID });
+    });
+
+    $btnRecall.addEventListener('click', () => {
+      socket.emit('release:recall', { counterId: MY_ID });
+    });
+
+    $btnReturn.addEventListener('click', () => {
+      socket.emit('release:return', { counterId: MY_ID });
+    });
+
     // ── Keyboard shortcuts ────────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
       if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
@@ -221,6 +309,16 @@
       }
       if (e.key === 'd' || e.key === 'D') {
         if (!$btnDone.disabled) socket.emit('counter:markDone', { counterId: MY_ID });
+      }
+      // The disabled checks also enforce mode: S is always disabled on the
+      // Releasing Window, R is always disabled on Counter 1/2.
+      if ((e.key === 's' || e.key === 'S') && !$btnSendRel.disabled) {
+        e.preventDefault();
+        socket.emit('counter:sendToRelease', { counterId: MY_ID });
+      }
+      if ((e.key === 'r' || e.key === 'R') && !$btnRecall.disabled) {
+        e.preventDefault();
+        socket.emit('release:recall', { counterId: MY_ID });
       }
     });
 

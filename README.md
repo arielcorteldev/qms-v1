@@ -44,7 +44,7 @@ nssm set QMS AppEnvironmentExtra PORT=3000 ADMIN_PIN=yourpin
 | Hub / Home    | `http://<your-ip>:3000`          | Any browser         |
 | Counter 1     | `http://<your-ip>:3000/counter.html?c=1` | Counter 1 PC |
 | Counter 2     | `http://<your-ip>:3000/counter.html?c=2` | Counter 2 PC |
-| Counter 3     | `http://<your-ip>:3000/counter.html?c=3` | Counter 3 PC |
+| Releasing Window | `http://<your-ip>:3000/counter.html?c=3` | Counter 3 PC |
 | Admin         | `http://<your-ip>:3000/admin.html`       | Admin PC     |
 | Display       | `http://<your-ip>:3000/display.html`     | Wall screen  |
 
@@ -53,15 +53,20 @@ Find your IP: `ipconfig` (Windows) or `ip addr` (Linux/Mac).
 ## How It Works
 
 1. Open **Admin** → click **Start Queue** (enter the admin PIN when asked)
-2. Counters can now click **Call Next** or **Call Priority**
+2. Counters 1 and 2 can now click **Call Next** or **Call Priority**
 3. Server assigns the next number in that line — no duplicates
-4. Counter clicks **Mark as Done** to free the slot
-5. Display screen updates in real time and announces the called number aloud
+4. When finished, the counter clicks either:
+   - **Done (No Release)** — the client is finished (counted as served), or
+   - **Send to Releasing** — the client waits for their document
+5. The **Releasing Window** (Counter 3) picks a waiting ticket from its list when the document is ready, then clicks **Mark as Released** (counted as served). If the client doesn't come, it can **Recall** (announce again) or **Return to List**
+6. Display screen updates in real time, shows the "For Release" list, and announces called numbers aloud
 
 ## Rules
 
 - Two lines: regular (1, 2, 3…) and priority (P1, P2, P3…), each strictly sequential
 - Each counter holds at most one active number
+- Counter 3 is the Releasing Window: it cannot call from the regular/priority lines, only from the "For Release" list (any order, no priority ordering)
+- A client counts as served only at the end: Done (No Release) at Counter 1/2, or Released at Counter 3
 - Must mark done before calling next — except calling regular while holding a priority number, which cancels it and returns it to the priority line (it is re-issued first)
 - Admin actions (start, reset, rename counter, enable/disable counter) require the PIN; 5 wrong PINs locks that device out for 60 seconds
 - Reset clears everything back to #1
@@ -69,11 +74,13 @@ Find your IP: `ipconfig` (Windows) or `ip addr` (Linux/Mac).
 
 ## Keyboard Shortcuts (Counter View)
 
-| Key             | Action        |
-|-----------------|---------------|
-| `Enter`/`Space` | Call Next     |
-| `P`             | Call Priority |
-| `D`             | Mark as Done  |
+| Key             | Counter 1/2        | Releasing Window  |
+|-----------------|--------------------|-------------------|
+| `Enter`/`Space` | Call Next          | —                 |
+| `P`             | Call Priority      | —                 |
+| `S`             | Send to Releasing  | —                 |
+| `R`             | —                  | Recall            |
+| `D`             | Done (No Release)  | Mark as Released  |
 
 ## Project Structure
 

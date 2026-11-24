@@ -41,6 +41,11 @@
             <div class="val" id="stat-active">0</div>
             <div class="lbl">Active Now</div>
           </div>
+          <!-- Clients done at Counter 1/2 but not yet released (not counted as served). -->
+          <div class="stat-card">
+            <div class="val" id="stat-for-release">0</div>
+            <div class="lbl">Waiting for Release</div>
+          </div>
           <div class="stat-card">
             <div class="val" id="stat-next">1</div>
             <div class="lbl">Next Number</div>
@@ -172,6 +177,7 @@
       document.getElementById('stat-served-regular').textContent = state.servedCounts?.regular ?? 0;
       document.getElementById('stat-served-priority').textContent = state.servedCounts?.priority ?? 0;
       document.getElementById('stat-active').textContent = activeCount;
+      document.getElementById('stat-for-release').textContent = state.forRelease?.length ?? 0;
       document.getElementById('stat-next').textContent = state.nextNumber ?? 1;
       document.getElementById('stat-log').textContent = state.log?.length ?? 0;
 
@@ -184,11 +190,12 @@
         const div = document.createElement('div');
         div.className = 'counter-item' + (c.enabled ? '' : ' disabled-counter');
         div.innerHTML = `
-          <div class="counter-num">${c.id}</div>
+          <!-- "R" marks the Releasing Window; other counters show their number. -->
+          <div class="counter-num">${c.id === state.releasingCounterId ? 'R' : c.id}</div>
           <div class="counter-info">
             <input class="counter-name-input" data-id="${c.id}" value="${c.name}" maxlength="30" />
             <div class="counter-serving ${active !== undefined ? 'active' : ''}">
-              ${active !== undefined ? `Serving ${display}${lane === 'priority' ? ' (Priority)' : ''}` : 'No active number'}
+              ${active !== undefined ? `${c.id === state.releasingCounterId ? 'Releasing' : 'Serving'} ${display}${lane === 'priority' ? ' (Priority)' : ''}` : 'No active number'}
             </div>
           </div>
           <button class="toggle-btn ${c.enabled ? 'enabled' : ''}" data-id="${c.id}">
@@ -226,7 +233,9 @@
 
       $logBody.innerHTML = log.map(entry => {
         const time = new Date(entry.timestamp).toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const statusClass = entry.status === 'Completed' ? 'done' : 'pending';
+        // Both end-of-visit statuses get the green "done" badge; everything
+        // in between (Called, For Release, Releasing, Recalled, …) is "pending".
+        const statusClass = (entry.status === 'Completed' || entry.status === 'Released') ? 'done' : 'pending';
         const lane = entry.lane === 'priority' ? 'priority' : 'regular';
         const laneBadge = `<span class="badge lane-badge ${lane === 'priority' ? 'lane-priority' : 'lane-regular'}">${lane}</span>`;
         return `

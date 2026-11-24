@@ -166,6 +166,20 @@ html, body {
   color: var(--color-neutral-50)
 }
 
+/* Secondary action (Send to Releasing, Return to List): outlined in primary
+   so it reads as "less final" than Done. */
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+  border-radius: var(--radius-md);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--color-primary-600);
+  color: var(--color-neutral-50);
+}
+
 .btn-start {
   background: var(--color-primary-600);
   color: var(--color-neutral-50);
@@ -491,6 +505,66 @@ html, body {
   border: 1px solid var(--color-primary-900);
   border-radius: var(--radius-md);
   padding: 0.1em 0.45em;
+}
+
+/* render() toggles the `hidden` attribute to switch serving/releasing controls.
+   Forced here so no other display rule can accidentally un-hide them. */
+.counter-page [hidden] {
+  display: none !important;
+}
+
+/* ── Releasing Window: waiting list ────────────────────────────────────────── */
+.release-section {
+  width: 100%;
+  max-width: 480px;
+}
+
+.release-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Each waiting ticket is a button; clicking it calls that client. */
+.release-ticket {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h6-desktop);
+  font-weight: var(--font-weight-700);
+  min-width: 4.5rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--color-neutral-100);
+  color: var(--color-primary-600);
+  border: 2px solid var(--color-primary-600);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, opacity 0.12s;
+}
+
+.release-ticket.is-priority {
+  color: var(--color-accent-yellow-600);
+  border-color: var(--color-accent-yellow-400);
+}
+
+.release-ticket:hover:not(:disabled) {
+  background: var(--color-primary-600);
+  color: var(--color-neutral-50);
+}
+
+.release-ticket.is-priority:hover:not(:disabled) {
+  background: var(--color-accent-yellow-600);
+  color: var(--color-neutral-50);
+}
+
+.release-ticket:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.release-empty {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-neutral-800);
 }
 
 /* ── Other Counters Grid ───────────────────────────────────────────────────── */
@@ -912,7 +986,8 @@ tbody td {
 
 .display-screen {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  /* header · counters · For Release strip · footer */
+  grid-template-rows: auto 1fr auto auto;
   height: 100vh;
 }
 
@@ -1054,6 +1129,52 @@ tbody td {
 
 .counter-status.serving {
   color: var(--color-accent-green-500);
+}
+
+/* ── Display: For Release strip ────────────────────────────────────────────── */
+/* One row of ticket chips for clients waiting at the Releasing Window. */
+.release-strip {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 3rem;
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+.release-strip-label {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-lg);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-neutral-800);
+  white-space: nowrap;
+}
+
+.release-strip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.release-chip {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h6-desktop);
+  font-weight: 800;
+  padding: 0.3rem 1rem;
+  color: var(--color-primary-600);
+  border: 2px solid var(--color-primary-600);
+  border-radius: var(--radius-md);
+}
+
+.release-chip.is-priority {
+  color: var(--color-accent-yellow-400);
+  border-color: var(--color-accent-yellow-400);
+}
+
+.release-strip .release-empty {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-800);
 }
 
 /* ── Display Footer ────────────────────────────────────────────────────────── */

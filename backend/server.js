@@ -16,8 +16,15 @@ const io = new Server(server, {
 const DEFAULT_COUNTERS = [
   { id: 1, name: 'Counter 1', enabled: true },
   { id: 2, name: 'Counter 2', enabled: true },
-  { id: 3, name: 'Counter 3', enabled: true },
+  { id: 3, name: 'Releasing Window', enabled: true },
 ];
+
+// Counter 3 is the Releasing Window. It never pulls from the regular/priority
+// queue; it only calls back tickets that Counter 1/2 sent to releasing.
+// Kept as a constant (not a per-counter field) because the role is fixed, so
+// restored state files need no migration. It is also sent to clients in
+// publicState() so the pages don't hardcode "3".
+const RELEASING_COUNTER_ID = 3;
 
 function freshState() {
   return {
@@ -31,6 +38,10 @@ function freshState() {
     // completedNumbers: string[] of ticket display values (e.g. "1", "P1")
     completedNumbers: [],
     servedCounts: { regular: 0, priority: 0 },
+    // forRelease: tickets Counter 1/2 finished processing whose document still
+    // has to be handed over at the Releasing Window. Kept in arrival order.
+    // Each item: { lane, seq, display, fromCounterId, queuedAt (ISO string) }
+    forRelease: [],
     counters: DEFAULT_COUNTERS.map(c => ({ ...c })),
     log: [],        // { ticket, lane, counterId, counterName, timestamp, status }
     started: false,
@@ -99,6 +110,9 @@ function loadState() {
       Array.isArray(s.counters) &&
       Array.isArray(s.completedNumbers) &&
       Array.isArray(s.log) &&
+      // forRelease is new: files saved before this feature won't have it
+      // (freshState() fills it in below), but if present it must be an array.
+      (s.forRelease === undefined || Array.isArray(s.forRelease)) &&
       s.activeNumbers && typeof s.activeNumbers === 'object';
     if (!looksValid) {
       console.error('Saved state is damaged. Starting a fresh queue.');
@@ -123,6 +137,11 @@ let state = loadState();
 
 function getCounter(id) {
   return state.counters.find(c => c.id === id);
+}
+
+// True if this counter is the Releasing Window (used by the guards below).
+function isReleasing(cid) {
+  return cid === RELEASING_COUNTER_ID;
 }
 
 function ticketDisplay(lane, seq) {
@@ -170,6 +189,8 @@ function publicState() {
     servedCounts: state.servedCounts,
     activeNumbers: state.activeNumbers,
     completedNumbers: state.completedNumbers,
+    forRelease: state.forRelease,
+    releasingCounterId: RELEASING_COUNTER_ID,
     counters: state.counters,
     log: state.log,
     started: state.started,
@@ -289,10 +310,14 @@ io.on('connection', (socket) => {
     broadcastState();
   }));
 
-  function emitCalled({ lane, seq, counter }) {
+  // kind: 'serve' = called from the queue at Counter 1/2,
+  //       'release' = called back to the Releasing Window. The display uses it
+  //       to pick the announcement wording.
+  function emitCalled({ lane, seq, counter, kind = 'serve' }) {
     io.emit('number:called', {
       ticket: ticketDisplay(lane, seq),
       lane,
+      kind,
       // Keep legacy keys for existing clients, but prefer ticket/lane going forward.
       number: lane === 'regular' ? seq : `P${seq}`,
       counterName: counter.name,
@@ -312,6 +337,8 @@ io.on('connection', (socket) => {
     if (!state.started) return socket.emit('error', 'Queue not started.');
     if (!counter) return socket.emit('error', 'Invalid counter.');
     if (!counter.enabled) return socket.emit('error', 'Counter is disabled.');
+    // Enforced here, not just by hiding buttons: any LAN client can emit events.
+    if (isReleasing(cid)) return socket.emit('error', 'Releasing Window cannot call from the queue.');
     const current = state.activeNumbers[cid];
     if (current !== undefined && current?.lane !== 'priority') {
       return socket.emit('error', 'Finish current number first.');
@@ -342,6 +369,7 @@ io.on('connection', (socket) => {
     if (!state.started) return socket.emit('error', 'Queue not started.');
     if (!counter) return socket.emit('error', 'Invalid counter.');
     if (!counter.enabled) return socket.emit('error', 'Counter is disabled.');
+    if (isReleasing(cid)) return socket.emit('error', 'Releasing Window cannot call from the queue.');
     if (state.activeNumbers[cid] !== undefined) return socket.emit('error', 'Finish current number first.');
 
     const seq = takeNextFromLane('priority');
@@ -353,7 +381,9 @@ io.on('connection', (socket) => {
     broadcastState();
   });
 
-  // Mark current number as done
+  // Mark current number as done — the END of a client's visit, so it counts as served.
+  //   Counter 1/2: "Done (No Release)" — nothing to hand over.
+  //   Releasing Window: "Mark as Released" — document handed over.
   socket.on('counter:markDone', ({ counterId }) => {
     const cid = parseInt(counterId, 10);
     const current = state.activeNumbers[cid];
@@ -365,7 +395,115 @@ io.on('connection', (socket) => {
     state.servedCounts[lane] = (state.servedCounts[lane] || 0) + 1;
     delete state.activeNumbers[cid];
 
-    logEntry({ ticket: current.display, lane, counterId: cid, status: 'Completed' });
+    logEntry({
+      ticket: current.display,
+      lane,
+      counterId: cid,
+      status: isReleasing(cid) ? 'Released' : 'Completed',
+    });
+    broadcastState();
+  });
+
+  // ─── Releasing flow ────────────────────────────────────────────────────────
+  //
+  //   Counter 1/2 ── Send to Releasing ──► forRelease[] ──► Releasing Window picks
+  //                                            ▲                     │
+  //                                            └── Return to List ───┤
+  //                                                                  └─ Mark as Released (markDone above)
+
+  // Counter 1/2 finished processing; client now waits for their document.
+  // NOT counted as served yet — that happens when it's released.
+  socket.on('counter:sendToRelease', ({ counterId }) => {
+    const cid = parseInt(counterId, 10);
+    const current = state.activeNumbers[cid];
+
+    if (!getCounter(cid)) return socket.emit('error', 'Invalid counter.');
+    if (isReleasing(cid)) return socket.emit('error', 'Releasing Window cannot send to releasing.');
+    if (current === undefined) return socket.emit('error', 'No active number to send.');
+
+    state.forRelease.push({
+      lane: current.lane,
+      seq: current.seq,
+      display: current.display,
+      fromCounterId: cid,
+      // queuedAt lets "Return to List" put a ticket back in its original spot.
+      queuedAt: new Date().toISOString(),
+    });
+    delete state.activeNumbers[cid];
+
+    logEntry({ ticket: current.display, lane: current.lane, counterId: cid, status: 'For Release' });
+    broadcastState();
+  });
+
+  // Releasing Window calls a specific waiting ticket (picked from the list,
+  // because documents can be ready out of order).
+  socket.on('release:call', ({ counterId, display }) => {
+    const cid = parseInt(counterId, 10);
+    const counter = getCounter(cid);
+
+    if (!state.started) return socket.emit('error', 'Queue not started.');
+    if (!counter) return socket.emit('error', 'Invalid counter.');
+    if (!isReleasing(cid)) return socket.emit('error', 'Only the Releasing Window can call for release.');
+    if (!counter.enabled) return socket.emit('error', 'Counter is disabled.');
+    if (state.activeNumbers[cid] !== undefined) return socket.emit('error', 'Finish current number first.');
+
+    // Ticket display strings ("12", "P3") are unique within a day, so they
+    // work as the identifier the client sends.
+    const idx = state.forRelease.findIndex(t => t.display === display);
+    if (idx === -1) return socket.emit('error', 'Ticket is not waiting for release.');
+
+    const [ticket] = state.forRelease.splice(idx, 1);
+    // Keep queuedAt on the active ticket so Return to List can restore its position.
+    state.activeNumbers[cid] = {
+      lane: ticket.lane,
+      seq: ticket.seq,
+      display: ticket.display,
+      fromCounterId: ticket.fromCounterId,
+      queuedAt: ticket.queuedAt,
+    };
+
+    emitCalled({ lane: ticket.lane, seq: ticket.seq, counter, kind: 'release' });
+    logEntry({ ticket: ticket.display, lane: ticket.lane, counterId: cid, status: 'Releasing' });
+    broadcastState();
+  });
+
+  // Client didn't come up — announce the same ticket again.
+  socket.on('release:recall', ({ counterId }) => {
+    const cid = parseInt(counterId, 10);
+    const counter = getCounter(cid);
+    const current = state.activeNumbers[cid];
+
+    if (!counter || !isReleasing(cid)) return socket.emit('error', 'Only the Releasing Window can recall.');
+    if (current === undefined) return socket.emit('error', 'No active number to recall.');
+
+    emitCalled({ lane: current.lane, seq: current.seq, counter, kind: 'release' });
+    logEntry({ ticket: current.display, lane: current.lane, counterId: cid, status: 'Recalled' });
+    // Queue state didn't change, but the log did — broadcast so it's saved and shown.
+    broadcastState();
+  });
+
+  // Client still not here — put the ticket back in the waiting list to call later.
+  socket.on('release:return', ({ counterId }) => {
+    const cid = parseInt(counterId, 10);
+    const current = state.activeNumbers[cid];
+
+    if (!getCounter(cid) || !isReleasing(cid)) return socket.emit('error', 'Only the Releasing Window can return tickets.');
+    if (current === undefined) return socket.emit('error', 'No active number to return.');
+
+    state.forRelease.push({
+      lane: current.lane,
+      seq: current.seq,
+      display: current.display,
+      fromCounterId: current.fromCounterId,
+      // Fallback for a ticket that somehow has no queuedAt: treat it as newest.
+      queuedAt: current.queuedAt || new Date().toISOString(),
+    });
+    // ISO timestamps sort correctly as plain strings, so this restores the
+    // ticket to its original position in arrival order.
+    state.forRelease.sort((a, b) => a.queuedAt.localeCompare(b.queuedAt));
+    delete state.activeNumbers[cid];
+
+    logEntry({ ticket: current.display, lane: current.lane, counterId: cid, status: 'Returned' });
     broadcastState();
   });
 

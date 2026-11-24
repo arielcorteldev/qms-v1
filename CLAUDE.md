@@ -23,7 +23,7 @@ Environment variables:
 - `PORT` — default 3000. Server binds to `0.0.0.0`.
 - `QMS_STATE_FILE` — default `backend/state.json`.
 
-There are no automated tests. After every change, verify manually: run the server and open `/admin.html`, `/counter.html?c=1`, and `/display.html` in separate tabs. Start the queue, call a regular and a priority ticket, mark one done, and confirm all three views update. Then restart the server and confirm the queue restores.
+There are no automated tests. After every change, verify manually: run the server and open `/admin.html`, `/counter.html?c=1`, `/counter.html?c=3`, and `/display.html` in separate tabs. Start the queue, call a regular and a priority ticket, mark one done, send one to releasing, release it from Counter 3, and confirm all views update. Then restart the server and confirm the queue restores.
 
 ## Architecture
 
@@ -33,18 +33,20 @@ There are no automated tests. After every change, verify manually: run the serve
 - Two lanes, `regular` and `priority`, each with a sequential `next` counter and a `returned` pool. `takeNextFromLane` re-issues the smallest returned number before advancing `next`. Tickets display as `"12"` (regular) or `"P3"` (priority) via `ticketDisplay`.
 - `activeNumbers[counterId] = { lane, seq, display }` — at most one active ticket per counter.
 - `counters` (fixed ids 1–3, renameable, enable/disable), `log` (newest first, capped at 200), `completedNumbers`, `servedCounts`, `started`.
+- **Releasing Window**: counter `RELEASING_COUNTER_ID` (3) never calls from the lanes. Counter 1/2 either complete a ticket (`markDone`) or move it to `forRelease` (array of `{ lane, seq, display, fromCounterId, queuedAt }`, arrival order). Counter 3 picks any ticket from `forRelease`, and its `markDone` logs `Released`. `completedNumbers`/`servedCounts` only grow at the end of a visit (Done without release, or Released). `publicState()` exposes `forRelease` and `releasingCounterId` so pages don't hardcode the id.
 
 **Mutation flow**: every socket handler mutates `state` then calls `broadcastState()`, which both persists to disk (`saveState`) and emits `state` to all clients (`publicState()`). New handlers must end with `broadcastState()` so persistence is not skipped. Clients are dumb renderers of the full `state` payload; they never compute queue logic themselves.
 
 **Socket events**:
-- Counter (no auth): `counter:callNext`, `counter:callPriority`, `counter:markDone` with `{ counterId }`. Errors are sent back as `socket.emit('error', msg)`. Calling regular while holding a priority ticket auto-cancels it and returns it to the priority pool.
+- Counter (no auth): `counter:callNext`, `counter:callPriority`, `counter:markDone` with `{ counterId }`. Errors are sent back as `socket.emit('error', msg)`. Calling regular while holding a priority ticket auto-cancels it and returns it to the priority pool. Call events reject the releasing counter.
+- Releasing (no auth): `counter:sendToRelease { counterId }` (Counter 1/2 only), `release:call { counterId, display }`, `release:recall { counterId }` (re-announce), `release:return { counterId }` (back to `forRelease`, original position by `queuedAt`) — the `release:*` events are Counter 3 only.
 - Admin (PIN-protected): `queue:start`, `queue:reset`, `admin:renameCounter`, `admin:toggleCounter`. Wrapped in `adminOnly(socket, handler)`; client sends `{ ...data, pin }` with an ack callback and receives `{ ok }` or `{ ok: false, code: 'bad-pin'|'locked'|'not-configured', error }`. PIN check is timing-safe, with per-IP lockout (5 failures → 60s). Auth must stay server-side — any LAN client can emit events directly.
-- Server → clients: `state` (full snapshot, also sent on connect) and `number:called` (drives the display's announcement; keeps legacy `number` key alongside `ticket`/`lane`).
+- Server → clients: `state` (full snapshot, also sent on connect) and `number:called` (drives the display's announcement; `kind: 'serve'|'release'` picks the wording; keeps legacy `number` key alongside `ticket`/`lane`).
 
 **Persistence**: state is written atomically (write `state.json.tmp`, then rename) on every change, wrapped as `{ savedDate, state }`. On boot it is restored only if `savedDate` is today (server local time) and passes a shape check; otherwise a fresh queue starts. Restored state is merged over `freshState()` so new fields get defaults — keep that pattern when adding fields.
 
 **Frontend** ([frontend/](frontend/)): plain HTML pages with inline `<script>` that load `/socket.io/socket.io.js`.
-- `counter.html?c=<id>` — counter operator; keyboard shortcuts Enter/Space (call next), P (call priority), D (done).
+- `counter.html?c=<id>` — counter operator. Serving mode (1/2): Enter/Space (call next), P (call priority), S (send to releasing), D (done, no release). Releasing mode (3): clickable waiting list, R (recall), Return to List button, D (mark as released). Mode comes from `state.releasingCounterId`; controls are toggled via `data-mode` + `hidden`.
 - `admin.html` — admin panel; prompts for PIN in a modal, caches it in `sessionStorage` (`qmsAdminPin`), and retries the pending action after re-prompting on `bad-pin`/`locked`.
 - `display.html` — wall screen; speaks called numbers with the Web Speech API.
 - `index.html` — hub linking to the views.

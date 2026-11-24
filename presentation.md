@@ -19,10 +19,11 @@ The system is meant for day-to-day front-desk work: regular clients and priority
 ## Features
 
 - **Fair numbering.** People are called in sequence. Regular numbers (1, 2, 3…) and priority numbers (P1, P2, P3…) run as two separate lines so priority clients can be served without losing their place among other priority clients.
-- **Call next, or call priority.** Each window can take the next regular number or the next priority number, depending on who should be served.
+- **Call next, or call priority.** Windows 1 and 2 can take the next regular number or the next priority number, depending on who should be served.
+- **Separate Releasing Window.** When a request needs a document, Window 1 or 2 sends the client to the Releasing Window (Counter 3) instead of finishing them. The Releasing Window calls each client back as soon as their document is ready, in whatever order the documents are finished. If the client is not there, it can call them again or put them back on the list.
 - **One person at a time per window.** A window finishes the current number before calling another, so staff are not juggling two clients at once.
 - **Live public display.** A wall screen shows, at a glance, which number is being served at each window, plus a clock and how many people have been served so far.
-- **Voice announcements.** When a number is called, the display speaks it out loud (for example: “Number 12, you may now proceed at Counter 2”), so people do not have to watch the screen constantly.
+- **Voice announcements.** When a number is called, the display speaks it out loud (for example: “Number 12, you may now proceed at Counter 2”, or “Number 12, your document is ready. Please proceed to the Releasing Window.”), so people do not have to watch the screen constantly.
 - **Supervisor controls.** An authorized person starts the queue for the day, can reset it if needed, rename windows, and turn a window on or off (for lunch break, absence, or a closed lane).
 - **Activity log.** Supervisors can see a running list of numbers called, completed, or cancelled, with time and window — useful for checking what happened during the day.
 - **Day’s progress at a glance.** Totals for regular served, priority served, people currently being served, and the next number waiting.
@@ -42,11 +43,12 @@ A starting page with the city and office logos. Staff pick the screen they need:
 
 ### 2. Counter (window / teller)
 
-Used at each serving window (Counter 1, 2, and 3).
+Used at each window. Counters 1 and 2 serve clients; Counter 3 is the Releasing Window.
 
 - Shows the number currently being served, and whether it is regular or priority.
-- Buttons to call the next regular client, call the next priority client, and mark the current client as done.
-- Keyboard shortcuts for faster work (Enter or Space to call next, P for priority, D for done).
+- Counters 1 and 2: buttons to call the next regular client, call the next priority client, and then either finish the client or send them to the Releasing Window.
+- Releasing Window: a list of clients waiting for their documents. Staff tap a number to call that client, can call again or put them back on the list if they do not come, and mark the document as released.
+- Keyboard shortcuts for faster work (Enter or Space to call next, P for priority, S to send to releasing, R to call again, D for done or released).
 - Shows what the other windows are serving.
 
 Staff wait here until a supervisor starts the queue for the day.
@@ -68,7 +70,8 @@ Meant for a large screen facing the public.
 - City and office logos.
 - Live clock.
 - A clear card for each window: name, number now serving, and whether it is a priority call.
-- Voice call-out when a new number is assigned.
+- A "For Release" list of numbers waiting for their documents.
+- Voice call-out when a new number is assigned or a document is ready.
 - Totals for people served and windows currently serving.
 
 ---
