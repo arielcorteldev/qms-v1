@@ -3,8 +3,23 @@
    Consolidated Design System & Styles
    ════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Font Imports ──────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Syne:wght@400..800&display=swap');
+/* ── Fonts (local, so pages work without internet) ─────────────────────────── */
+/* Variable-weight files, Latin subset. Licenses in assets/fonts/*-OFL.txt */
+@font-face {
+  font-family: "Inter";
+  src: url("../assets/fonts/inter-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Public Sans";
+  src: url("../assets/fonts/public-sans-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ── Global Reset ──────────────────────────────────────────────────────────── */
 *, *::before, *::after {
