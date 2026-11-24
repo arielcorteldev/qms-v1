@@ -47,6 +47,7 @@ There are no automated tests. After every change, verify manually: run the serve
 
 **Frontend** ([frontend/](frontend/)): plain HTML pages with inline `<script>` that load `/socket.io/socket.io.js`.
 - `counter.html?c=<id>` — counter operator. Serving mode (1/2): Enter/Space (call next), P (call priority), S (send to releasing), D (done, no release). Releasing mode (3): clickable waiting list, R (recall), Return to List button, D (mark as released). Mode comes from `state.releasingCounterId`; controls are toggled via `data-mode` + `hidden`.
+- **Naming rule**: the frontend never shows "Counter 3". The releasing counter is labelled "Releasing Window" everywhere: counter header and tab title, display panel label and priority line (`counterLabel()` in display.html), and the admin badge ("R"). These read `state.releasingCounterId`. Exception: `index.html` has no socket, so its hub link text is hardcoded. Update it there if the releasing id ever changes. The URL `counter.html?c=3` is unchanged.
 - `admin.html` — admin panel; prompts for PIN in a modal, caches it in `sessionStorage` (`qmsAdminPin`), and retries the pending action after re-prompting on `bad-pin`/`locked`.
 - `display.html` — wall screen; speaks called numbers with the Web Speech API.
 - `index.html` — hub linking to the views.
